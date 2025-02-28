@@ -1,3 +1,4 @@
+{{ block "topic" . }}
 <!DOCTYPE html>
 <html lang="en">
         <head>
@@ -10,6 +11,47 @@
                 </script>
         </head>
         <body>
-                {{ .Name }} {{ .Description }}
+                {{ template "topic-form" . }}
+                <hr>
+                {{ template "topic-subject" . }}
+                {{ template "topic-message" . }}
+                <script>
+                        document.addEventListener("DOMContentLoaded", (event) => {
+                                document.body.addEventListener("htmx:beforeSwap", function(evt) {
+                                        if (evt.detail.xhr.status === 422 || evt.detail.xhr.status === 500) {
+                                                evt.detail.shouldSwap = true;
+                                                evt.detail.isError = false;
+                                        }
+                                });
+                        });
+                </script>
         </body>
 </html>
+{{ end }}
+
+{{ block "topic-form" . }}
+<form 
+        hx-post="/postMessage/{{ .Subject.UUID }}"
+        hx-on::after-request="this.reset()"
+>
+        <input type="text" name="message" placeholder="message"/>
+        <button type="submit">add</button>
+</form>
+{{ if .Error }}
+<span style="color: red;">{{ .Error }}</span>
+{{ end }}
+{{ end }}
+
+{{ block "topic-subject" . }}
+<div>
+        Name: {{ .Subject.Name }}</span>
+        <br/>
+        Description: {{ .Subject.Description }}</span>
+</div>
+{{ end }}
+
+{{ block "topic-message" . }}
+<br>
+Answers:
+<br>
+{{ end }}
