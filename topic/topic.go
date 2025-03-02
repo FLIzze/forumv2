@@ -38,9 +38,9 @@ func GetTopic(c echo.Context) error {
         defer db.Close()
 
         row := db.QueryRow(`
-                SELECT UUID, Name, Description 
-                FROM topic
-                WHERE UUID = ?
+        SELECT UUID, Name, Description 
+        FROM topic
+        WHERE UUID = ?
         `, URI)
 
         err = row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description)
@@ -48,6 +48,31 @@ func GetTopic(c echo.Context) error {
                 c.Logger().Error("Error retrieving topic: ", err)
                 response.Error = "Could not retrieve topic."
                 return c.Render(500, "topic", response)
+        }
+
+        rows, err := db.Query(`
+        SELECT Content 
+        FROM message
+        WHERE TopicUUID = ?
+        `, URI)
+        if err != nil {
+                c.Logger().Error("Error retrieving topic message: ", err)
+                response.Error = "Could not retrieve topic message."
+                return c.Render(500, "topic", response)
+        }
+        defer rows.Close()
+
+        message := Message{}
+
+        for rows.Next() {
+                err := rows.Scan(&message.Content)
+                if err != nil {
+                        c.Logger().Error("Error retrieving topic message from column: ", err)
+                        response.Error = "Could not retrieve topic message from column."
+                        return c.Render(500, "topic", response)
+                }
+
+                response.Messages = append(response.Messages, message)
         }
 
         return c.Render(200, "topic", response)
