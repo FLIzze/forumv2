@@ -1,9 +1,11 @@
 package forum
 
 import (
+	dbi "forum/db"
+
+        "database/sql"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-        "github.com/google/uuid"
-        dbi "forum/db"
 )
 
 type TopicResponse struct {
@@ -28,14 +30,9 @@ func GetTopic(c echo.Context) error {
         response := TopicResponse{}
 
         URI := c.Param("uuid")
+        c.Logger().Debug(URI)
 
-        db, err := dbi.ConnectDb()
-        if err != nil {
-                c.Logger().Error("Error connecting to db: ", err)
-                response.Error = "Could not connect to database."
-                return c.Render(500, "topic", response)
-        }
-        defer db.Close()
+        db := c.Get("db").(*sql.DB)
 
         row := db.QueryRow(`
         SELECT UUID, Name, Description 
@@ -43,7 +40,7 @@ func GetTopic(c echo.Context) error {
         WHERE UUID = ?
         `, URI)
 
-        err = row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description)
+        err := row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
                 response.Error = "Could not retrieve topic."
@@ -62,9 +59,9 @@ func GetTopic(c echo.Context) error {
         }
         defer rows.Close()
 
-        message := Message{}
 
         for rows.Next() {
+                message := Message{}
                 err := rows.Scan(&message.Content)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
@@ -82,16 +79,8 @@ func PostMessage(c echo.Context) error {
         response := TopicResponse{}
         message := Message{}
 
-        db, err := dbi.ConnectDb()
-        if err != nil {
-                c.Logger().Error("Error connecting to db: ", err)
-                response.Error = "Could not connect to database."
-                return c.Render(500, "topic-form", response)
-        }
-        defer db.Close()
-
         message.UUID = uuid.New().String()
-        message.TopicUUID = c.Param("topicUUID")
+        message.TopicUUID = c.FormValue("uuid")
         message.Content = c.FormValue("message")
 
         if message.Content == "" {
@@ -100,7 +89,11 @@ func PostMessage(c echo.Context) error {
                 return c.Render(422, "topic-form", response)
         }
 
-        _, err = db.Exec(`
+        response.Messages = append(response.Messages, message)
+
+        db := c.Get("db").(*sql.DB)
+
+        _, err := db.Exec(`
         INSERT INTO message (UUID, TopicUUID, Content) 
         VALUES (?, ?, ?)
         `, message.UUID, message.TopicUUID, message.Content)
@@ -110,5 +103,6 @@ func PostMessage(c echo.Context) error {
                 return c.Render(500, "topic-form", response)
         }
 
-        return c.Render(200, "topic", nil)
+        c.Render(200, "topic-form", response)
+        return c.Render(200, "oob-created-topic", message)
 }

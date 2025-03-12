@@ -1,10 +1,11 @@
 package forum
 
 import (
-        dbi "forum/db"
-
+        "database/sql"
         "github.com/google/uuid"
         "github.com/labstack/echo/v4"
+
+        dbi "forum/db"
 )
 
 type HomeResponse struct {
@@ -18,16 +19,11 @@ type Topic struct {
         Description string
 }
 
-func GetHomePage(c echo.Context) error {
+func HomePage(c echo.Context) error {
         response := HomeResponse{}
         topic := Topic{}
 
-        db, err := dbi.ConnectDb()
-        if err != nil {
-                c.Logger().Error("Error connecting to db: ", err)
-                response.Error = "Could not connect to database."
-                return c.Render(500, "home", response)
-        }
+        db := c.Get("db").(*sql.DB)
 
         rows, err := db.Query(`
         SELECT UUID, Name, Description FROM topic
@@ -57,13 +53,6 @@ func PostTopic(c echo.Context) error {
         response := HomeResponse{}
         topic := Topic{}
 
-        db, err := dbi.ConnectDb()
-        if err != nil {
-                c.Logger().Error("Error connecting to db: ", err)
-                response.Error = "Could not connect to database."
-                return c.Render(500, "topics-form", response)
-        }
-
         topic.UUID = uuid.New().String()
         topic.Name = c.FormValue("name")
         topic.Description = c.FormValue("description")
@@ -74,7 +63,11 @@ func PostTopic(c echo.Context) error {
                 return c.Render(422, "topics-form", response)
         }
 
-        _, err = db.Exec(`
+        response.Topics = append(response.Topics, topic)
+
+        db := c.Get("db").(*sql.DB)
+
+        _, err := db.Exec(`
         INSERT INTO topic (UUID, Name, Description) 
         VALUES (?, ?, ?)
         `, topic.UUID, topic.Name, topic.Description)
@@ -83,8 +76,6 @@ func PostTopic(c echo.Context) error {
                 response.Error = "Error retrieving response.Topic."
                 return c.Render(500, "topics-form", response)
         }
-
-        response.Topics = append(response.Topics, topic)
 
         c.Render(200, "topics-form", response)
         return c.Render(200, "oob-topic", response)
