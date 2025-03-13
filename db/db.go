@@ -54,3 +54,19 @@ func CreateTable(db *sql.DB) error {
 
         return err
 }
+
+func CreateView(db *sql.DB) error {
+        _, err := db.Exec(`
+        CREATE VIEW userSession AS
+        SELECT 
+                u.UUID AS UserUUID,
+                u.Username,
+                u.Email,
+                s.SessionUUID,
+                s.Connected
+        FROM user u
+        JOIN session s ON u.UUID = s.UserUUID;
+        `)
+
+        return err
+}

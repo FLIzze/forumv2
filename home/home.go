@@ -2,8 +2,11 @@ package forum
 
 import (
         "database/sql"
+
         "github.com/google/uuid"
         "github.com/labstack/echo/v4"
+
+        // user "forum/user"
 )
 
 type HomeResponse struct {
@@ -48,6 +51,13 @@ func GetHomePage(c echo.Context) error {
                 response.Topics = append(response.Topics, topic)
                 index++
         }
+
+        user := c.Get("user")
+        // if user != nil {
+        //         user := user.(user.user)
+        // }
+
+        c.Logger().Error(user)
 
         return c.Render(200, "home", response)
 }

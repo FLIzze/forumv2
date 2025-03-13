@@ -14,3 +14,8 @@ func PostCookie(c echo.Context, value string) {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.SetCookie(cookie)
 }
+
+func GetCookie(c echo.Context) (*http.Cookie, error) {
+        cookie, err := c.Cookie("session")
+        return cookie, err
+}
