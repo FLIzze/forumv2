@@ -15,6 +15,7 @@ import (
 
 	"fmt"
 	dbi "forum/db"
+        user "forum/user"
 )
 
 type Templates struct {
@@ -26,9 +27,13 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 }
 
 func newTemplate() *Templates {
-        return &Templates{
-                templates: template.Must(template.ParseGlob("views/*.html")),
-        }
+	funcMap := template.FuncMap{
+		"mod": func(a, b int) int { return a % b }, 
+	}
+
+	return &Templates{
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("views/*.html")),
+	}
 }
 
 func main() {
@@ -39,10 +44,10 @@ func main() {
         }
         defer db.Close()
 
-        // err = dbi.CreateTable(db)
-        // if err != nil {
-        //         fmt.Printf("Error creating table: %s", err)
-        // }
+        err = dbi.CreateTable(db)
+        if err != nil {
+                fmt.Printf("Error creating table: %s", err)
+        }
 
         e := echo.New()
         e.Use(middleware.Logger())
@@ -56,14 +61,19 @@ func main() {
                 }
         })
 
-        e.GET("/", home.HomePage)
+        e.GET("/", home.GetHomePage)
         e.POST("/postTopic", home.PostTopic)
-        // e.DELETE("/topic/:uuid", home.DeleteTopic)
 
         e.GET("/topic/:uuid", topic.GetTopic) 
         e.POST("/postMessage", topic.PostMessage)
 
         e.GET("/*", er404.Get404)
+
+        e.GET("/login", user.GetLogin)
+        e.POST("/login", user.PostLogin)
+        e.GET("/register", user.GetRegister)
+        e.POST("/register", user.PostRegister)
+        e.POST("/logout", user.LogOut)
 
         e.Logger.Fatal(e.Start(":42069"))
 }

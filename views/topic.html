@@ -11,8 +11,7 @@
                 </script>
         </head>
         <body>
-                <a href="/">Go home</a>
-                <br>
+                {{ template "navbar" . }}
                 {{ template "topic-form" . }}
                 <hr>
                 {{ template "topic-subject" . }}
@@ -40,29 +39,24 @@
 >
         <input type="text" name="message" placeholder="message"/>
         <button type="submit">add</button>
-        <br>
         {{ if .Error }}
-        <span style="color: red;">{{ .Error }}</span>
+        {{ .Error }}
         {{ end }}
 </form>
 {{ end }}
 
 {{ block "topic-subject" . }}
 <div>
-        Name: {{ .Subject.Name }}</span>
-        <br/>
-        Description: {{ .Subject.Description }}</span>
+        Name: {{ .Subject.Name }}
+        Description: {{ .Subject.Description }}
 </div>
 {{ end }}
 
 {{ block "topic-message" . }}
-<br>
 Answers:
-<br>
 <div id="topics-displayed">
         {{ range .Messages }}
         {{ .Content }}
-        <br>
         {{ end }}
 </div>
 {{ end }}
@@ -71,7 +65,6 @@ Answers:
 <div id="topics-displayed" hx-swap-oob="afterbegin">
         {{ if .Content }}
         {{ .Content }}
-        <br>
         {{ end }}
 </div>
 {{ end }}

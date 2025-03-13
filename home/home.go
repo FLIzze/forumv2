@@ -4,8 +4,6 @@ import (
         "database/sql"
         "github.com/google/uuid"
         "github.com/labstack/echo/v4"
-
-        dbi "forum/db"
 )
 
 type HomeResponse struct {
@@ -17,9 +15,10 @@ type Topic struct {
         UUID string
         Name string
         Description string
+        Index int
 }
 
-func HomePage(c echo.Context) error {
+func GetHomePage(c echo.Context) error {
         response := HomeResponse{}
         topic := Topic{}
 
@@ -35,15 +34,19 @@ func HomePage(c echo.Context) error {
         }
         defer rows.Close()
 
+        index := 0
+
         for rows.Next() {
                 err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        response.Error = "Could not retrieve data from column"
+                        response.Error = "Internal error"
                         return c.Render(422, "home", response)
                 }
 
+                topic.Index = index
                 response.Topics = append(response.Topics, topic)
+                index++
         }
 
         return c.Render(200, "home", response)
@@ -72,31 +75,11 @@ func PostTopic(c echo.Context) error {
         VALUES (?, ?, ?)
         `, topic.UUID, topic.Name, topic.Description)
         if err != nil {
-                c.Logger().Error("Error retrieving response.Topic: ", err)
-                response.Error = "Error retrieving response.Topic."
+                c.Logger().Error("Error inserting response Topic: ", err)
+                response.Error = "Internal error"
                 return c.Render(500, "topics-form", response)
         }
 
         c.Render(200, "topics-form", response)
         return c.Render(200, "oob-topic", response)
-}
-
-func DeleteTopic(c echo.Context) error {
-        URI := c.Param("uuid")
-
-        db, err := dbi.ConnectDb()
-        if err != nil {
-                c.Logger().Error("Error connecting to db: ", err)
-                return c.Render(500, "error", nil)
-        }
-
-        _, err = db.Exec(`
-        DELETE FROM topic WHERE UUID = ?
-        `, URI)
-        if err != nil {
-                c.Logger().Error("Error deleting topic: ", err)
-                return c.Render(500, "error", nil)
-        }
-
-        return c.Render(200, "oob-topic", nil)
 }

@@ -11,8 +11,8 @@
                 </script>
         </head>
         <body>
+                {{ template "navbar" . }}
                 {{ template "topics-form" . }}
-                <hr>
                 {{ template "topics-display" . }}
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
@@ -33,6 +33,7 @@
         hx-post="/postTopic" 
         hx-on::after-request="this.reset()"
         id="topics-form"
+        class="mb-4"
 >
         <input type="text" name="name" placeholder="name"/>
         <input type="text" name="description" placeholder="description"/>
@@ -53,17 +54,12 @@
 {{ end }}
 
 {{ block "home-topic" . }}
-<div>
-        Name: {{ .Name }}</span>
-        <br/>
-        Description: {{ .Description }}</span>
-        <br/>
-        <a href="topic/{{ .UUID }}">view</a>
-        <br/>
-        <!-- <button hx-delete="/topic/{{ .UUID }}">Delete</button> -->
-        <!-- <br/> -->
-        <br/>
-</div>
+<a href="topic/{{ .UUID }}">
+        <div class="p-2 {{ if mod .Index 2 | eq 0 }} bg-gray-200 {{ else }} bg-white {{ end }}">
+                <span>{{ .Name }}</span>
+                <p class="text-gray-600">{{ .Description }}</p>
+        </div>
+</a>
 {{ end }}
 
 {{ block "oob-topic" . }}

@@ -28,5 +28,29 @@ func CreateTable(db *sql.DB) error {
                 Content text NOT NULL
         )
         `)
+        if err != nil {
+                return err
+        }
+
+        _, err = db.Exec(`
+        CREATE TABLE IF NOT EXISTS user (
+                UUID varchar(37) NOT NULL,
+                Username varchar(17) NOT NULL,
+                Email varchar(254) NOT NULL,
+                Password varchar(60) NOT NULL
+        )
+        `)
+        if err != nil {
+                return err 
+        }
+
+        _, err = db.Exec(`
+        CREATE TABLE IF NOT EXISTS session (
+                SessionUUID varchar(37),
+                UserUUID varchar(37) NOT NULL,
+                Connected int DEFAULT 0
+        )
+        `)
+
         return err
 }

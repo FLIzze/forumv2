@@ -1,11 +1,11 @@
 package forum
 
 import (
-	dbi "forum/db"
-
+        "html/template"
         "database/sql"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+
+        utils "forum/utils"
 )
 
 type TopicResponse struct {
@@ -23,14 +23,13 @@ type Subject struct {
 type Message struct {
         UUID string
         TopicUUID string
-        Content string
+        Content template.HTML
 }
 
 func GetTopic(c echo.Context) error {
         response := TopicResponse{}
 
-        URI := c.Param("uuid")
-        c.Logger().Debug(URI)
+        UUID := c.Param("uuid")
 
         db := c.Get("db").(*sql.DB)
 
@@ -38,7 +37,7 @@ func GetTopic(c echo.Context) error {
         SELECT UUID, Name, Description 
         FROM topic
         WHERE UUID = ?
-        `, URI)
+        `, UUID)
 
         err := row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description)
         if err != nil {
@@ -51,7 +50,7 @@ func GetTopic(c echo.Context) error {
         SELECT Content 
         FROM message
         WHERE TopicUUID = ?
-        `, URI)
+        `, UUID)
         if err != nil {
                 c.Logger().Error("Error retrieving topic message: ", err)
                 response.Error = "Could not retrieve topic message."
@@ -65,7 +64,7 @@ func GetTopic(c echo.Context) error {
                 err := rows.Scan(&message.Content)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
-                        response.Error = "Could not retrieve topic message from column."
+                        response.Error = "Internal server error"
                         return c.Render(500, "topic", response)
                 }
 
@@ -79,9 +78,9 @@ func PostMessage(c echo.Context) error {
         response := TopicResponse{}
         message := Message{}
 
-        message.UUID = uuid.New().String()
+        message.UUID = utils.Uuid()
         message.TopicUUID = c.FormValue("uuid")
-        message.Content = c.FormValue("message")
+        message.Content = utils.RenderMarkdown(c.FormValue("message"))
 
         if message.Content == "" {
                 c.Logger().Error("Message empty")
@@ -99,7 +98,7 @@ func PostMessage(c echo.Context) error {
         `, message.UUID, message.TopicUUID, message.Content)
         if err != nil {
                 c.Logger().Error("Error retrieving response.Topic: ", err)
-                response.Error = "Error retrieving response.Topic."
+                response.Error = "Internal server error"
                 return c.Render(500, "topic-form", response)
         }
 
