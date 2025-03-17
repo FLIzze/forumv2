@@ -104,6 +104,7 @@ func main() {
         e.GET("/register", user.GetRegister)
         e.POST("/register", user.PostRegister)
         e.POST("/logout", user.LogOut)
+        e.GET("/user/:username", user.Profil)
 
         e.Logger.Fatal(e.Start(":42069"))
 }

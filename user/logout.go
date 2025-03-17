@@ -2,8 +2,11 @@ package forum
 
 import (
         "github.com/labstack/echo/v4"
+
+        cookie "forum/cookie"
 )
 
 func LogOut(c echo.Context) error {
-        return c.Render(200, "login", nil)
+        cookie.RemoveCookie(c)
+        return c.Render(200, "home", nil)
 }

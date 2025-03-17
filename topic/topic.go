@@ -6,12 +6,14 @@ import (
 	"github.com/labstack/echo/v4"
 
         utils "forum/utils"
+        user "forum/user"
 )
 
 type TopicResponse struct {
         Error string
         Subject Subject
         Messages []Message
+        User user.User
 }
 
 type Subject struct {
@@ -30,6 +32,12 @@ func GetTopic(c echo.Context) error {
         response := TopicResponse{}
 
         UUID := c.Param("uuid")
+        user, ok := c.Get("user").(user.User)
+        if !ok {
+                c.Logger().Debug("User is not logged in")
+        } else {
+                response.User = user
+        }
 
         db := c.Get("db").(*sql.DB)
 

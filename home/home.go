@@ -6,12 +6,13 @@ import (
         "github.com/google/uuid"
         "github.com/labstack/echo/v4"
 
-        // user "forum/user"
+        user "forum/user"
 )
 
 type HomeResponse struct {
         Error string
         Topics []Topic
+        User user.User
 }
 
 type Topic struct {
@@ -26,6 +27,12 @@ func GetHomePage(c echo.Context) error {
         topic := Topic{}
 
         db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(user.User)
+        if !ok {
+                c.Logger().Debug("User is not logged in")
+        } else {
+                response.User = user
+        }
 
         rows, err := db.Query(`
         SELECT UUID, Name, Description FROM topic
@@ -51,11 +58,6 @@ func GetHomePage(c echo.Context) error {
                 response.Topics = append(response.Topics, topic)
                 index++
         }
-
-        user := c.Get("user")
-        // if user != nil {
-        //         user := user.(user.user)
-        // }
 
         c.Logger().Error(user)
 

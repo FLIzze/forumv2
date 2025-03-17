@@ -13,7 +13,6 @@
         <body>
                 {{ template "navbar" . }}
                 {{ template "topic-form" . }}
-                <hr>
                 {{ template "topic-subject" . }}
                 {{ template "topic-message" . }}
                 <script>
@@ -37,10 +36,14 @@
         id="topic-form"
         hx-on::after-request="this.reset()"
 >
+        {{ if .User.UUID }}
         <input type="text" name="message" placeholder="message"/>
         <button type="submit">add</button>
         {{ if .Error }}
         {{ .Error }}
+        {{ end }}
+        {{ else }}
+        <p>Login to post a message</p>
         {{ end }}
 </form>
 {{ end }}

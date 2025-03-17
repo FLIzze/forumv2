@@ -35,12 +35,16 @@
         id="topics-form"
         class="mb-4"
 >
+        {{ if .User.UUID }}
         <input type="text" name="name" placeholder="name"/>
         <input type="text" name="description" placeholder="description"/>
         <button type="submit">add</button>
         <br>
         {{ if .Error }}
-        <span style="color: red;">{{ .Error }}</span>
+        <span style="coUsernamelor: red;">{{ .Error }}</span>
+        {{ end }}
+        {{ else }}
+        <p>Login to post a topic</p>
         {{ end }}
 </form>
 {{ end }}
