@@ -19,7 +19,8 @@ type Topic struct {
         UUID string
         Name string
         Description string
-        Index int
+        CreatedBy string
+        NmbMessages int
 }
 
 func GetHomePage(c echo.Context) error {
@@ -33,7 +34,7 @@ func GetHomePage(c echo.Context) error {
         }
 
         rows, err := db.Query(`
-        SELECT UUID, Name, Description FROM topic
+        SELECT UUID, Name, Description, CreatedBy, NmbMessages FROM topicInfo
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
@@ -42,19 +43,15 @@ func GetHomePage(c echo.Context) error {
         }
         defer rows.Close()
 
-        index := 0
-
         for rows.Next() {
-                err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description)
+                err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedBy, &topic.NmbMessages)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
                         response.Error = "Internal error"
                         return c.Render(422, "home", response)
                 }
 
-                topic.Index = index
                 response.Topics = append(response.Topics, topic)
-                index++
         }
 
         c.Logger().Error(user)

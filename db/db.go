@@ -59,8 +59,7 @@ func CreateTable(db *sql.DB) error {
 
 func CreateView(db *sql.DB) error {
         _, err := db.Exec(`
-        CREATE VIEW userSession AS
-        SELECT 
+        CREATE VIEW IF NOT EXISTS userSession AS SELECT 
                 u.UUID AS UserUUID,
                 u.Username,
                 u.Email,
@@ -68,6 +67,34 @@ func CreateView(db *sql.DB) error {
                 s.Connected
         FROM user u
         JOIN session s ON u.UUID = s.UserUUID;
+        `)
+        if err != nil {
+                return err 
+        }
+
+        _, err = db.Exec(`
+        CREATE VIEW IF NOT EXISTS topicInfo AS SELECT      
+                t.UUID,
+                t.Name,
+                t.Description,
+                u.Username as CreatedBy,
+                COUNT(m.UUID) AS NmbMessages
+        FROM topic t 
+        JOIN user u ON t.CreatedBy = u.UUID 
+        LEFT JOIN message m ON t.UUID = m.TopicUUID 
+        GROUP BY t.UUID, t.Name, t.Description, u.Username;
+        `)
+        if err != nil {
+                return err 
+        }
+
+        _, err = db.Exec(`
+        CREATE VIEW IF NOT EXISTS messageInfo AS SELECT 
+                m.TopicUUID,
+                m.Content, 
+                u.Username as CreatedBy 
+        FROM message m 
+        JOIN user u ON m.CreatedBy = u.UUID;
         `)
 
         return err

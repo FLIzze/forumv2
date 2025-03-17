@@ -51,15 +51,16 @@
 {{ block "topic-subject" . }}
 <div>
         Name: {{ .Subject.Name }}
+        <br/>
         Description: {{ .Subject.Description }}
 </div>
+<br/>
 {{ end }}
 
 {{ block "topic-message" . }}
-Answers:
 <div id="topics-displayed">
         {{ range .Messages }}
-        {{ .Content }}
+        {{ .Content }} - {{ .CreatedBy }}
         {{ end }}
 </div>
 {{ end }}

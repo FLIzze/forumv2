@@ -26,6 +26,7 @@ type Message struct {
         UUID string
         TopicUUID string
         Content template.HTML
+        CreatedBy string
 }
 
 func GetTopic(c echo.Context) error {
@@ -55,8 +56,8 @@ func GetTopic(c echo.Context) error {
         }
 
         rows, err := db.Query(`
-        SELECT Content 
-        FROM message
+        SELECT Content, CreatedBy
+        FROM messageInfo
         WHERE TopicUUID = ?
         `, UUID)
         if err != nil {
@@ -69,7 +70,7 @@ func GetTopic(c echo.Context) error {
 
         for rows.Next() {
                 message := Message{}
-                err := rows.Scan(&message.Content)
+                err := rows.Scan(&message.Content, &message.CreatedBy)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
                         response.Error = "Internal server error"

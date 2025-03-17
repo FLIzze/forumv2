@@ -59,10 +59,16 @@
 
 {{ block "home-topic" . }}
 <a href="topic/{{ .UUID }}">
-        <div class="p-2 {{ if mod .Index 2 | eq 0 }} bg-gray-200 {{ else }} bg-white {{ end }}">
-                {{ .Name }}
-                {{ .Description }}
+        <div>
+                Name: {{ .Name }}
+                </br>
+                Description: {{ .Description }}
+                </br>
+                By: {{ .CreatedBy }}
+                </br>
+                NmbMessages: {{ .NmbMessages }}
         </div>
+        </br>
 </a>
 {{ end }}
 
