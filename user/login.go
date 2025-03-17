@@ -29,6 +29,11 @@ func PostLogin(c echo.Context) error {
         password := c.FormValue("password")
         username := c.FormValue("username")
 
+        if (username == "" || password == "") {
+                response.Error = "You must fill the whole form"
+                return c.Render(422, "login-form", response)
+        }
+
         db := c.Get("db").(*sql.DB)
 
         row := db.QueryRow(`

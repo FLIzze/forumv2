@@ -3,6 +3,7 @@ package forum
 import (
         "database/sql"
         "github.com/labstack/echo/v4"
+        "time"
 
         utils "forum/utils"
 )
@@ -19,8 +20,47 @@ func PostRegister(c echo.Context) error {
         response := RegisterResponse{}
 
         userUUID := utils.Uuid()
+        username := c.FormValue("username")
+        email := c.FormValue("email")
         password := c.FormValue("password")
         passwordConfirmation := c.FormValue("password-confirm")
+
+        if (username == "" || email == "" || password == "" || passwordConfirmation == "") {
+                response.Error = "You must fill the whole form"
+                return c.Render(422, "register-form", response)
+        }
+
+        db := c.Get("db").(*sql.DB)
+
+        rows, err := db.Query(`
+        SELECT Username, Email from user
+        `)
+        if err != nil {
+                c.Logger().Error("Error retrieving username", err)
+                response.Error = "Internal server error"
+                return c.Render(500, "register-form", response)
+        }
+        defer rows.Close()
+
+        for rows.Next() {
+                var existingUsername string
+                var existingEmail string
+
+                err := rows.Scan(&existingUsername, &existingEmail)
+                if err != nil {
+                        c.Logger().Error("Error scanning row", err)
+                        response.Error = "Internal server error"
+                        return c.Render(422, "register-form", response)
+                }
+
+                if username == existingUsername {
+                        response.Error = "Username already taken"
+                        return c.Render(422, "register-form", response)
+                } else if email == existingEmail {
+                        response.Error = "Email already taken"
+                        return c.Render(422, "register-form", response)
+                }
+        }
 
         if (password != passwordConfirmation) {
                 response.Error = "Both password must match"
@@ -39,21 +79,15 @@ func PostRegister(c echo.Context) error {
                 return c.Render(500, "register-form", response)
         }
 
-        var username = c.FormValue("username")
-
         if (len(username) < 3 || len(username) > 17) {
                 response.Error = "Username must be < 3 and > 17"
                 return c.Render(422, "register-form", response)
         }
 
-        email := c.FormValue("email")
-
-        db := c.Get("db").(*sql.DB)
-
         _, err = db.Exec(`
-        INSERT INTO user (UUID, Username, Email, Password)
-        VALUES (?, ?, ?, ?)
-        `, userUUID, username, email, hashedPassword)
+        INSERT INTO user (UUID, Username, Email, Password, CreationTime)
+        VALUES (?, ?, ?, ?, ?)
+        `, userUUID, username, email, hashedPassword, time.Now())
         if err != nil {
                 c.Logger().Error("Error inserting user: %s", err)
                 response.Error = "Internal server error"
@@ -70,5 +104,5 @@ func PostRegister(c echo.Context) error {
                 return c.Render(500, "register", response)
         }
 
-        return c.Render(200, "register", response)
+        return c.Render(200, "register", nil)
 }

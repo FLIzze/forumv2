@@ -13,6 +13,7 @@
         <body>
                 {{ if .User.UUID }}
                 <p>Hi {{ .User.Username }}</p>
+                <a hx-swap="outerHTML" hx-post="/logout" href="/">Logout</a>
                 <a href="/user/{{ .User.Username }}">profil</a>
                 {{ else }}
                 <a href="/register">register</a>

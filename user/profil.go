@@ -2,6 +2,7 @@ package forum
 
 import (
         "github.com/labstack/echo/v4"
+        // "database/sql"
 )
 
 type Response struct {
@@ -12,12 +13,8 @@ type Response struct {
 func Profil(c echo.Context) error {
         response := Response{} 
 
-        user, ok := c.Get("user").(User)
-        if !ok {
-                c.Logger().Debug("User is not logged in")
-        } else {
-                response.User = user
-        }
+        // db := c.Get("db").(*sql.DB)
+        // username := c.Param("username")
 
         return c.Render(200, "profil", response)
 }

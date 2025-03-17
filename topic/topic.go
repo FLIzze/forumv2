@@ -1,12 +1,14 @@
 package forum
 
 import (
-        "html/template"
-        "database/sql"
+	"database/sql"
+	"html/template"
+	"time"
+
 	"github.com/labstack/echo/v4"
 
-        utils "forum/utils"
-        user "forum/user"
+	user "forum/user"
+	utils "forum/utils"
 )
 
 type TopicResponse struct {
@@ -108,9 +110,9 @@ func PostMessage(c echo.Context) error {
         }
 
         _, err := db.Exec(`
-        INSERT INTO message (UUID, TopicUUID, Content, CreatedBy) 
-        VALUES (?, ?, ?, ?)
-        `, message.UUID, message.TopicUUID, message.Content, user.UUID)
+        INSERT INTO message (UUID, TopicUUID, Content, CreatedBy, CreationTime) 
+        VALUES (?, ?, ?, ?, ?)
+        `, message.UUID, message.TopicUUID, message.Content, user.UUID, time.Now())
         if err != nil {
                 c.Logger().Error("Error retrieving response.Topic: ", err)
                 response.Error = "Internal server error"

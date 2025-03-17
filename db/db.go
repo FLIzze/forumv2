@@ -12,10 +12,11 @@ func ConnectDb() (*sql.DB, error) {
 func CreateTable(db *sql.DB) error {
         _, err := db.Exec(`
         CREATE TABLE IF NOT EXISTS topic (
-                UUID varchar(37) NOT NULL, 
+                UUID varchar(37) NOT NULL UNIQUE, 
                 Name varchar(25) NOT NULL, 
                 Description text NOT NULL,
-                CreatedBy varchar(37) NOT NULL
+                CreatedBy varchar(37) NOT NULL,
+                CreationTime DATETIME NOT NULL
         )
         `)
         if err != nil {
@@ -24,10 +25,11 @@ func CreateTable(db *sql.DB) error {
 
         _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS message (
-                UUID varchar(37) NOT NULL,
+                UUID varchar(37) NOT NULL UNIQUE,
                 TopicUUID varchar(37) NOT NULL,
                 Content text NOT NULL,
-                CreatedBy varchar(37) NOT NULL
+                CreatedBy varchar(37) NOT NULL,
+                CreationTime DATETIME NOT NULL
         )
         `)
         if err != nil {
@@ -36,10 +38,11 @@ func CreateTable(db *sql.DB) error {
 
         _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS user (
-                UUID varchar(37) NOT NULL,
-                Username varchar(17) NOT NULL,
-                Email varchar(254) NOT NULL,
-                Password varchar(60) NOT NULL
+                UUID varchar(37) NOT NULL UNIQUE,
+                Username varchar(17) NOT NULL UNIQUE,
+                Email varchar(254) NOT NULL UNIQUE,
+                Password varchar(60) NOT NULL,
+                CreationTime DATETIME NOT NULL
         )
         `)
         if err != nil {
@@ -48,7 +51,7 @@ func CreateTable(db *sql.DB) error {
 
         _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS session (
-                SessionUUID varchar(37),
+                SessionUUID varchar(37) UNIQUE,
                 UserUUID varchar(37) NOT NULL,
                 Connected int DEFAULT 0
         )
@@ -73,12 +76,18 @@ func CreateView(db *sql.DB) error {
         }
 
         _, err = db.Exec(`
-        CREATE VIEW IF NOT EXISTS topicInfo AS SELECT      
+        CREATE VIEW IF NOT EXISTS topicInfo AS 
+        SELECT      
                 t.UUID,
                 t.Name,
                 t.Description,
-                u.Username as CreatedBy,
-                COUNT(m.UUID) AS NmbMessages
+                u.Username AS CreatedBy,
+                COUNT(m.UUID) AS NmbMessages,
+                (SELECT m2.CreationTime
+                FROM message m2 
+                WHERE m2.TopicUUID = t.UUID 
+                ORDER BY m2.CreationTime DESC 
+                LIMIT 1) AS LastMessage
         FROM topic t 
         JOIN user u ON t.CreatedBy = u.UUID 
         LEFT JOIN message m ON t.UUID = m.TopicUUID 
@@ -96,6 +105,9 @@ func CreateView(db *sql.DB) error {
         FROM message m 
         JOIN user u ON m.CreatedBy = u.UUID;
         `)
+        if err != nil {
+                return err 
+        }
 
         return err
 }

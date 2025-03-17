@@ -1,12 +1,13 @@
 package forum
 
 import (
-        "database/sql"
+	"database/sql"
+	"time"
 
-        "github.com/google/uuid"
-        "github.com/labstack/echo/v4"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 
-        user "forum/user"
+	user "forum/user"
 )
 
 type HomeResponse struct {
@@ -47,7 +48,7 @@ func GetHomePage(c echo.Context) error {
                 err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedBy, &topic.NmbMessages)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        response.Error = "Internal error"
+                        response.Error = "Internal server error"
                         return c.Render(422, "home", response)
                 }
 
@@ -84,9 +85,9 @@ func PostTopic(c echo.Context) error {
         }
 
         _, err := db.Exec(`
-        INSERT INTO topic (UUID, Name, Description, CreatedBy) 
-        VALUES (?, ?, ?, ?)
-        `, topic.UUID, topic.Name, topic.Description, user.UUID)
+        INSERT INTO topic (UUID, Name, Description, CreatedBy, CreationTime) 
+        VALUES (?, ?, ?, ?, ?)
+        `, topic.UUID, topic.Name, topic.Description, user.UUID, time.Now())
         if err != nil {
                 c.Logger().Error("Error inserting response Topic: ", err)
                 response.Error = "Internal error"
