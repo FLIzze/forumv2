@@ -44,15 +44,15 @@ func main() {
         }
         defer db.Close()
 
-        // err = dbi.CreateTable(db)
-        // if err != nil {
-        //         fmt.Printf("Error creating table: %s", err)
-        // }
+        err = dbi.CreateTable(db)
+        if err != nil {
+                fmt.Printf("Error creating table: %s", err)
+        }
 
-        // err = dbi.CreateView(db)
-        // if err != nil {
-        //         fmt.Printf("Error creating view: %s", err)
-        // }
+        err = dbi.CreateView(db)
+        if err != nil {
+                fmt.Printf("Error creating view: %s", err)
+        }
 
         e := echo.New()
         e.Use(middleware.Logger())
@@ -103,8 +103,8 @@ func main() {
         e.POST("/login", user.PostLogin)
         e.GET("/register", user.GetRegister)
         e.POST("/register", user.PostRegister)
-        e.POST("/logout", user.LogOut)
         e.GET("/user/:username", user.Profil)
+        e.POST("/logout", user.LogOut)
 
         e.Logger.Fatal(e.Start(":42069"))
 }

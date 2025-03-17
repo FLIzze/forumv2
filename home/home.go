@@ -28,9 +28,7 @@ func GetHomePage(c echo.Context) error {
 
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(user.User)
-        if !ok {
-                c.Logger().Debug("User is not logged in")
-        } else {
+        if ok {
                 response.User = user
         }
 
@@ -81,11 +79,17 @@ func PostTopic(c echo.Context) error {
         response.Topics = append(response.Topics, topic)
 
         db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(user.User)
+        if !ok {
+                c.Logger().Debug("User is not logged in")
+        } else {
+                response.User = user
+        }
 
         _, err := db.Exec(`
-        INSERT INTO topic (UUID, Name, Description) 
-        VALUES (?, ?, ?)
-        `, topic.UUID, topic.Name, topic.Description)
+        INSERT INTO topic (UUID, Name, Description, CreatedBy) 
+        VALUES (?, ?, ?, ?)
+        `, topic.UUID, topic.Name, topic.Description, user.UUID)
         if err != nil {
                 c.Logger().Error("Error inserting response Topic: ", err)
                 response.Error = "Internal error"

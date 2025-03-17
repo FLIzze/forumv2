@@ -99,11 +99,17 @@ func PostMessage(c echo.Context) error {
         response.Messages = append(response.Messages, message)
 
         db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(user.User)
+        if !ok {
+                c.Logger().Debug("User is not logged in")
+        } else {
+                response.User = user
+        }
 
         _, err := db.Exec(`
-        INSERT INTO message (UUID, TopicUUID, Content) 
-        VALUES (?, ?, ?)
-        `, message.UUID, message.TopicUUID, message.Content)
+        INSERT INTO message (UUID, TopicUUID, Content, CreatedBy) 
+        VALUES (?, ?, ?, ?)
+        `, message.UUID, message.TopicUUID, message.Content, user.UUID)
         if err != nil {
                 c.Logger().Error("Error retrieving response.Topic: ", err)
                 response.Error = "Internal server error"

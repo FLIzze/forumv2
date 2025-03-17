@@ -6,8 +6,18 @@ import (
 
 type Response struct {
         Error string
+        User User
 }
 
 func Profil(c echo.Context) error {
-        return c.Render(200, "profil", nil)
+        response := Response{} 
+
+        user, ok := c.Get("user").(User)
+        if !ok {
+                c.Logger().Debug("User is not logged in")
+        } else {
+                response.User = user
+        }
+
+        return c.Render(200, "profil", response)
 }

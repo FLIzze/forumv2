@@ -14,7 +14,8 @@ func CreateTable(db *sql.DB) error {
         CREATE TABLE IF NOT EXISTS topic (
                 UUID varchar(37) NOT NULL, 
                 Name varchar(25) NOT NULL, 
-                Description text NOT NULL
+                Description text NOT NULL,
+                CreatedBy varchar(37) NOT NULL
         )
         `)
         if err != nil {
@@ -25,7 +26,8 @@ func CreateTable(db *sql.DB) error {
         CREATE TABLE IF NOT EXISTS message (
                 UUID varchar(37) NOT NULL,
                 TopicUUID varchar(37) NOT NULL,
-                Content text NOT NULL
+                Content text NOT NULL,
+                CreatedBy varchar(37) NOT NULL
         )
         `)
         if err != nil {

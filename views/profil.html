@@ -11,8 +11,12 @@
                 </script>
         </head>
         <body>
-                profil
-                <!-- {{ .User.Username }} -->
+                {{ template "navbar" . }}
+                </br>
+                </br>
+                {{ .User.Username }}
+                </br>
+                {{ .User.UUID }}
         </body>
 </html>
 {{ end }}
