@@ -75,9 +75,12 @@ func main() {
                         currentUser.SessionUUID = cookie.Value
 
                         row := db.QueryRow(`
-                        SELECT UserUUID, Username, Email
-                        FROM userSession
-                        WHERE SessionUUID = ?
+                        SELECT 
+                                UserUUID, Username, Email
+                        FROM 
+                                userSession
+                        WHERE 
+                                SessionUUID = ?
                         `, currentUser.SessionUUID)
 
                         err = row.Scan(&currentUser.UUID, &currentUser.Username, &currentUser.Email)

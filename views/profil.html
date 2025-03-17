@@ -11,12 +11,28 @@
                 </script>
         </head>
         <body>
+                {{ if .Error }}
+                {{ .Error }}
+                {{ else }}
                 {{ template "navbar" . }}
-                </br>
-                </br>
-                {{ .User.Username }}
-                </br>
-                {{ .User.UUID }}
+                {{ template "userInfo" .User }}
+                {{ end }}
         </body>
 </html>
+{{ end }}
+
+{{ block "userInfo" . }}
+</br>
+</br>
+Username: {{ .Username }}
+</br>
+CreationTime: {{ .CreationTime }}
+</br>
+NmbMessagesPosted: {{ .NmbMessagesPosted }}
+</br>
+NmbTopicsCreated: {{ .NmbTopicsCreated }}
+</br>
+{{ if .LastMessage }}
+LastMessage: {{ .LastMessage }}
+{{ end }}
 {{ end }}

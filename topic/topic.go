@@ -45,9 +45,12 @@ func GetTopic(c echo.Context) error {
         db := c.Get("db").(*sql.DB)
 
         row := db.QueryRow(`
-        SELECT UUID, Name, Description 
-        FROM topic
-        WHERE UUID = ?
+        SELECT 
+                UUID, Name, Description 
+        FROM 
+                topic
+        WHERE 
+                UUID = ?
         `, UUID)
 
         err := row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description)
@@ -58,9 +61,12 @@ func GetTopic(c echo.Context) error {
         }
 
         rows, err := db.Query(`
-        SELECT Content, CreatedBy
-        FROM messageInfo
-        WHERE TopicUUID = ?
+        SELECT 
+                Content, CreatedBy
+        FROM 
+                messageInfo
+        WHERE 
+                TopicUUID = ?
         `, UUID)
         if err != nil {
                 c.Logger().Error("Error retrieving topic message: ", err)

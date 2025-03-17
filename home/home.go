@@ -35,7 +35,10 @@ func GetHomePage(c echo.Context) error {
         }
 
         rows, err := db.Query(`
-        SELECT UUID, Name, Description, CreatedBy, NmbMessages FROM topicInfo
+        SELECT 
+                UUID, Name, Description, CreatedBy, NmbMessages 
+        FROM 
+                topicInfo
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)

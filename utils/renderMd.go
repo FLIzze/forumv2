@@ -11,5 +11,6 @@ func RenderMarkdown(md string) template.HTML {
 	if err := goldmark.Convert([]byte(md), &buf); err != nil {
 		return template.HTML(md) 
 	}
+
 	return template.HTML(buf.String())
 }
