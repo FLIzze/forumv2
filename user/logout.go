@@ -8,5 +8,5 @@ import (
 
 func LogOut(c echo.Context) error {
         cookie.RemoveCookie(c)
-        return c.Render(200, "home", nil)
+        return c.Render(200, "navbar", nil)
 }

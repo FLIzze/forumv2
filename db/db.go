@@ -11,34 +11,8 @@ func ConnectDb() (*sql.DB, error) {
 
 func CreateTable(db *sql.DB) error {
         _, err := db.Exec(`
-        CREATE TABLE IF NOT EXISTS topic (
-                UUID varchar(37) NOT NULL UNIQUE, 
-                Name varchar(25) NOT NULL, 
-                Description text NOT NULL,
-                CreatedBy varchar(37) NOT NULL,
-                CreationTime DATETIME NOT NULL
-        )
-        `)
-        if err != nil {
-                return err
-        }
-
-        _, err = db.Exec(`
-        CREATE TABLE IF NOT EXISTS message (
-                UUID varchar(37) NOT NULL UNIQUE,
-                TopicUUID varchar(37) NOT NULL,
-                Content text NOT NULL,
-                CreatedBy varchar(37) NOT NULL,
-                CreationTime DATETIME NOT NULL
-        )
-        `)
-        if err != nil {
-                return err
-        }
-
-        _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS user (
-                UUID varchar(37) NOT NULL UNIQUE,
+                UUID varchar(37) NOT NULL PRIMARY KEY,
                 Username varchar(17) NOT NULL UNIQUE,
                 Email varchar(254) NOT NULL UNIQUE,
                 Password varchar(60) NOT NULL,
@@ -50,9 +24,39 @@ func CreateTable(db *sql.DB) error {
         }
 
         _, err = db.Exec(`
+        CREATE TABLE IF NOT EXISTS topic (
+                UUID varchar(37) NOT NULL PRIMARY KEY, 
+                Name varchar(25) NOT NULL, 
+                Description text NOT NULL,
+                CreatedBy varchar(37) NULL,
+                FOREIGN KEY (CreatedBy) REFERENCES user(UUID) ON DELETE SET NULL,
+                CreationTime DATETIME NOT NULL
+        )
+        `)
+        if err != nil {
+                return err
+        }
+
+        _, err = db.Exec(`
+        CREATE TABLE IF NOT EXISTS message (
+                UUID varchar(37) NOT NULL PRIMARY KEY,
+                Content text NOT NULL,
+                CreationTime DATETIME NOT NULL,
+                TopicUUID varchar(37) NULL,
+                CreatedBy varchar(37) NULL,
+                FOREIGN KEY (TopicUUID) REFERENCES topic(UUID) ON DELETE SET NULL,
+                FOREIGN KEY (CreatedBy) REFERENCES user(UUID) ON DELETE SET NULL
+        )
+        `)
+        if err != nil {
+                return err
+        }
+
+        _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS session (
-                SessionUUID varchar(37) UNIQUE,
-                UserUUID varchar(37) NOT NULL,
+                SessionUUID varchar(37) PRIMARY KEY,
+                UserUUID varchar(37) NULL,
+                FOREIGN KEY (UserUUID) REFERENCES user(UUID) ON DELETE SET NULL,
                 Connected int DEFAULT 0
         )
         `)
@@ -98,7 +102,7 @@ func CreateView(db *sql.DB) error {
                 ) AS LastMessage
         FROM 
                 topic t 
-        JOIN 
+        LEFT JOIN 
                 user u ON t.CreatedBy = u.UUID 
         LEFT JOIN 
                 message m ON t.UUID = m.TopicUUID 
@@ -147,5 +151,15 @@ func CreateView(db *sql.DB) error {
                 u.UUID, u.Username, u.CreationTime;
         `)
 
+        return err
+}
+
+func CreateIndex(db *sql.DB) error {
+        _, err := db.Exec(`
+        CREATE INDEX 
+                idx_user_username 
+        ON 
+                user (Username);
+        `)
         return err
 }

@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"io"
 	"os"
-        "fmt"
+        "log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
@@ -39,20 +39,25 @@ func newTemplate() *Templates {
 func main() {
         db, err := dbi.ConnectDb()
         if err != nil {
-                fmt.Printf("Error connecting to database: %s", err)
+                log.Fatalf("Error connecting to database: %v", err)
                 os.Exit(1)
         }
         defer db.Close()
 
-        err = dbi.CreateTable(db)
-        if err != nil {
-                fmt.Printf("Error creating table: %s", err)
-        }
+        // err = dbi.CreateTable(db)
+        // if err != nil {
+        //         log.Fatalf("Error creating table: %v", err)
+        // }
 
-        err = dbi.CreateView(db)
-        if err != nil {
-                fmt.Printf("Error creating view: %s", err)
-        }
+        // err = dbi.CreateIndex(db)
+        // if err != nil {
+        //         log.Fatalf("Error creating index: %v", err)
+        // }
+
+        // err = dbi.CreateView(db)
+        // if err != nil {
+        //         log.Fatalf("Error creating view: %v", err)
+        // }
 
         e := echo.New()
         e.Use(middleware.Logger())

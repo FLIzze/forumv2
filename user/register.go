@@ -95,9 +95,9 @@ func PostRegister(c echo.Context) error {
         }
 
         _, err = db.Exec(`
-        INSERT INTO session (UserUUID)
-        VALUES (?)
-        `, userUUID)
+        INSERT INTO session (SessionUUID, UserUUID)
+        VALUES (?, ?)
+        `, utils.Uuid(), userUUID)
         if err != nil {
                 c.Logger().Error("Error inserting session: %s", err)
                 response.Error = "Internal server error"
