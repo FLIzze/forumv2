@@ -11,11 +11,11 @@
                 </script>
         </head>
         <body>
-                {{ if .Error }}
-                        {{ .Error }}
+                {{ if .Status.Error }}
+                        {{ .Status.Error }}
                 {{ else }}
                         {{ template "navbar" . }}
-                        {{ template "userInfo" .User }}
+                        {{ template "userInfo" .UserProfil }}
                 {{ end }}
         </body>
 </html>

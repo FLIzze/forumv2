@@ -44,12 +44,12 @@
                         <p>Login to post a topic</p>
                 {{ end }}
 
-                {{ if .Error }}
-                        {{ .Error }}
+                {{ if .Status.Error }}
+                        {{ .Status.Error }}
                 {{ end }}
 
-                {{ if .Success }}
-                        {{ .Success }}
+                {{ if .Status.Success }}
+                        {{ .Status.Success }}
                 {{ end }}
         </form>
 {{ end }}

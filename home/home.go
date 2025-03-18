@@ -7,31 +7,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	user "forum/user"
+        structs "forum/structs"
 )
 
-type HomeResponse struct {
-        Error string
-        Success string
-        Topics []Topic
-        User user.User
-}
-
-type Topic struct {
-        UUID string
-        Name string
-        Description string
-        CreatedByUsername string
-        CreatedByUUID string
-        NmbMessages int
-}
-
 func GetHomePage(c echo.Context) error {
-        response := HomeResponse{}
-        topic := Topic{}
+        response := structs.HomeResponse{}
+        topic := structs.Topic{}
 
         db := c.Get("db").(*sql.DB)
-        user, ok := c.Get("user").(user.User)
+        user, ok := c.Get("user").(structs.User)
         if ok {
                 response.User = user
         }
@@ -44,7 +28,7 @@ func GetHomePage(c echo.Context) error {
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
-                response.Error = "Something went wrong. Please try again later."
+                response.Status.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "home", response)
         }
         defer rows.Close()
@@ -54,7 +38,7 @@ func GetHomePage(c echo.Context) error {
                                                                 &topic.CreatedByUUID, &topic.NmbMessages)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        response.Error = "Something went wrong. Please try again later."
+                        response.Status.Error = "Something went wrong. Please try again later."
                         return c.Render(422, "home", response)
                 }
 
@@ -65,8 +49,8 @@ func GetHomePage(c echo.Context) error {
 }
 
 func PostTopic(c echo.Context) error {
-        response := HomeResponse{}
-        topic := Topic{}
+        response := structs.HomeResponse{}
+        topic := structs.Topic{}
 
         topic.UUID = uuid.New().String()
         topic.Name = c.FormValue("name")
@@ -74,14 +58,14 @@ func PostTopic(c echo.Context) error {
 
         if topic.Name == "" || topic.Description == "" {
                 c.Logger().Error("Name and/or description empty")
-                response.Error = "Name and description must be filled."
+                response.Status.Error = "Name and description must be filled."
                 return c.Render(422, "topics-form", response)
         }
 
         db := c.Get("db").(*sql.DB)
-        user, ok := c.Get("user").(user.User)
+        user, ok := c.Get("user").(structs.User)
         if !ok {
-                response.Error = "You must be logged in to post a topic."
+                response.Status.Error = "You must be logged in to post a topic."
                 return c.Render(401, "topics-form", response)
         } else {
                 response.User = user
@@ -93,7 +77,7 @@ func PostTopic(c echo.Context) error {
         `, topic.UUID, topic.Name, topic.Description, user.UUID, time.Now())
         if err != nil {
                 c.Logger().Error("Error inserting response Topic: ", err)
-                response.Error = "Something went wrong. Please try again later."
+                response.Status.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "topics-form", response)
         }
 
@@ -108,24 +92,24 @@ func PostTopic(c echo.Context) error {
         err = row.Scan(&topic.CreatedByUsername, &topic.CreatedByUUID, &topic.NmbMessages)
         if err != nil {
                 c.Logger().Error("Error fetching new topic: ", err)
-                response.Error = "Something went wrong. Please try again later."
+                response.Status.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "topics-form", response)
         }
 
         response.Topics = append(response.Topics, topic)
-        response.Success = "Topic succesfully created."
+        response.Status.Success = "Topic succesfully created."
 
         c.Render(200, "topics-form", response)
         return c.Render(200, "oob-topic", response)
 }
 
 func DeleteTopic(c echo.Context) error {
-        response := HomeResponse{}
+        response := structs.HomeResponse{}
 
         db := c.Get("db").(*sql.DB)
-        user, ok := c.Get("user").(user.User)
+        user, ok := c.Get("user").(structs.User)
         if !ok {
-                response.Error = "You must be logged in to delete a topic."
+                response.Status.Error = "You must be logged in to delete a topic."
                 return c.Render(401, "home", response)
         } else {
                 response.User = user
@@ -141,11 +125,11 @@ func DeleteTopic(c echo.Context) error {
         `, uuid)
         if err != nil {
                 c.Logger().Error("Error deleting from topic", err)
-                response.Error = "Something went wrong. Please try again later."
+                response.Status.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "home", response)
         }
 
-        response.Success = "Topic succesfully deleted."
+        response.Status.Success = "Topic succesfully deleted."
 
         return c.Render(200, "home", response)
 }

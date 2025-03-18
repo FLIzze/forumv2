@@ -6,30 +6,20 @@ import (
 
         cookie "forum/cookie"
         utils "forum/utils"
+        structs "forum/structs"
 )
-
-type LoginResponse struct {
-        Error string
-        Login Login
-}
-
-type Login struct {
-        Username string
-        UUID string
-        Password []byte
-}
 
 func GetLogin(c echo.Context) error {
         return c.Render(200, "login", nil)
 }
 
 func PostLogin(c echo.Context) error {
-        response := LoginResponse{}
+        response := structs.Status{}
 
-        password := c.FormValue("password")
-        username := c.FormValue("username")
+        inputPassword := c.FormValue("password")
+        inputUsername := c.FormValue("username")
 
-        if (username == "" || password == "") {
+        if (inputUsername == "" || inputPassword == "") {
                 response.Error = "You must fill the whole form"
                 return c.Render(422, "login-form", response)
         }
@@ -40,16 +30,20 @@ func PostLogin(c echo.Context) error {
         SELECT Username, UUID, Password
         FROM user
         WHERE Username = ?
-        `, username)
+        `, inputUsername)
 
-        err := row.Scan(&response.Login.Username, &response.Login.UUID, &response.Login.Password)
+        var username string
+        var uuid string
+        var password []byte
+
+        err := row.Scan(&username, &uuid, &password)
         if err != nil {
                 c.Logger().Error("Incorrect username", err)
                 response.Error = "Incorrect password or username"
                 return c.Render(422, "login-form", response)
         }
 
-        err = utils.CompareHashPassword(response.Login.Password, password)
+        err = utils.CompareHashPassword(password, inputPassword)
         if err != nil {
                 c.Logger().Error("Incorrect password", err)
                 response.Error = "Incorrect password or username"
@@ -62,7 +56,7 @@ func PostLogin(c echo.Context) error {
         UPDATE session
         SET Connected = 1, SessionUUID = ?
         WHERE UserUUID = ?
-        `, sessionUUID, response.Login.UUID)
+        `, sessionUUID, uuid)
         if err != nil {
                 c.Logger().Error("Error updating session", err)
                 response.Error = "Something went wrong. Please try again later."
@@ -70,6 +64,7 @@ func PostLogin(c echo.Context) error {
         }
 
         cookie.PostCookie(c, sessionUUID)
+        response.Success = "Sucessfully logged in."
 
-        return c.Render(200, "login-form", nil)
+        return c.Render(200, "login-form", response)
 }

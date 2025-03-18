@@ -6,18 +6,15 @@ import (
         "time"
 
         utils "forum/utils"
+        structs "forum/structs"
 )
-
-type RegisterResponse struct {
-        Error string
-}
 
 func GetRegister(c echo.Context) error {
         return c.Render(200, "register", nil)
 }
 
 func PostRegister(c echo.Context) error {
-        response := RegisterResponse{}
+        response := structs.Status{}
 
         userUUID := utils.Uuid()
         username := c.FormValue("username")
@@ -107,5 +104,7 @@ func PostRegister(c echo.Context) error {
                 return c.Render(500, "register", response)
         }
 
-        return c.Render(200, "register", nil)
+        response.Success = "Account created succesfully."
+
+        return c.Render(200, "register", response)
 }

@@ -39,5 +39,9 @@
                 {{ if .Error }}
                         {{ .Error }}
                 {{ end }}
+
+                {{ if .Success }}
+                        {{ .Success }}
+                {{ end }}
         </form>
 {{ end }}

@@ -1,20 +1,25 @@
 package forum
 
 import (
-        "github.com/labstack/echo/v4"
         "database/sql"
+
+        "github.com/labstack/echo/v4"
+
+        structs "forum/structs"
 )
 
-type Response struct {
-        Error string
-        User User
-}
-
 func Profil(c echo.Context) error {
-        response := Response{} 
-        user := User{}
+        response := structs.ProfilResponse{} 
+        user := structs.User{}
 
         db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(structs.User)
+        if !ok {
+                response.Status.Error = "You must be logged in to delete a topic."
+                return c.Render(401, "home", response)
+        } else {
+                response.User = user
+        }
         username := c.Param("username")
 
         row := db.QueryRow(`
@@ -29,10 +34,10 @@ func Profil(c echo.Context) error {
         err := row.Scan(&user.Username, &user.CreationTime, &user.NmbMessagesPosted, &user.NmbTopicsCreated, &user.LastMessage)
         if err != nil {
                 c.Logger().Error("Error retrieving user from userInfo", err)
-                response.Error = "User does not exist"
+                response.Status.Error = "User does not exist"
                 return c.Render(404, "404", nil)
         }
-        response.User = user
+        response.UserProfil = user
 
         return c.Render(200, "profil", response)
 }

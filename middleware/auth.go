@@ -5,19 +5,19 @@ import (
         "database/sql"
 
         cookie "forum/cookie"
-        user "forum/user"
+        structs "forum/structs"
 )
 
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
         return func(c echo.Context) error {
                 db, ok := c.Get("db").(*sql.DB)
                 if !ok {
-                        return echo.NewHTTPError(500, "Database connection not found")
+                        return echo.NewHTTPError(500, "Something went wrong. Please try again later.")
                 }
 
                 cookie, err := cookie.GetCookie(c)
                 if err == nil { 
-                        var currentUser user.User
+                        var currentUser structs.User
                         currentUser.SessionUUID = cookie.Value
 
                         row := db.QueryRow(`

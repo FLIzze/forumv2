@@ -38,8 +38,12 @@
                 <input type="password" placeholder="repeat password" name="password-confirm"/>
                 <button type="submit">create account</button>
 
-                {{ if .Errorr }}
+                {{ if .Error }}
                         {{ .Error }}
+                {{ end }}
+
+                {{ if .Success }}
+                        {{ .Success }}
                 {{ end }}
         </form>
 {{ end }}
