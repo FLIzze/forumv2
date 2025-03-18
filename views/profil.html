@@ -12,27 +12,28 @@
         </head>
         <body>
                 {{ if .Error }}
-                {{ .Error }}
+                        {{ .Error }}
                 {{ else }}
-                {{ template "navbar" . }}
-                {{ template "userInfo" .User }}
+                        {{ template "navbar" . }}
+                        {{ template "userInfo" .User }}
                 {{ end }}
         </body>
 </html>
 {{ end }}
 
 {{ block "userInfo" . }}
-</br>
-</br>
-Username: {{ .Username }}
-</br>
-CreationTime: {{ .CreationTime }}
-</br>
-NmbMessagesPosted: {{ .NmbMessagesPosted }}
-</br>
-NmbTopicsCreated: {{ .NmbTopicsCreated }}
-</br>
-{{ if .LastMessage }}
-LastMessage: {{ .LastMessage }}
-{{ end }}
+        </br>
+        </br>
+        Username: {{ .Username }}
+        </br>
+        CreationTime: {{ .CreationTime }}
+        </br>
+        NmbMessagesPosted: {{ .NmbMessagesPosted }}
+        </br>
+        NmbTopicsCreated: {{ .NmbTopicsCreated }}
+        </br>
+
+        {{ if .LastMessage }}
+                LastMessage: {{ .LastMessage }}
+        {{ end }}
 {{ end }}

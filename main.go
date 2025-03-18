@@ -3,8 +3,6 @@ package main
 import (
 	"html/template"
 	"io"
-	"os"
-        "log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
@@ -14,9 +12,8 @@ import (
 	er404 "forum/er404"
 	home "forum/home"
 	topic "forum/topic"
-	dbi "forum/db"
         user "forum/user"
-        cookie "forum/cookie"
+        mw "forum/middleware"
 )
 
 type Templates struct {
@@ -36,86 +33,31 @@ func newTemplate() *Templates {
 }
 
 func main() {
-        db, err := dbi.ConnectDb()
-        if err != nil {
-                log.Fatalf("Error connecting to database: %v", err)
-                os.Exit(1)
-        }
-        defer db.Close()
-
-        // err = dbi.CreateTable(db)
-        // if err != nil {
-        //         log.Fatalf("Error creating table: %v", err)
-        // }
-
-        // err = dbi.CreateIndex(db)
-        // if err != nil {
-        //         log.Fatalf("Error creating index: %v", err)
-        // }
-
-        // err = dbi.CreateView(db)
-        // if err != nil {
-        //         log.Fatalf("Error creating view: %v", err)
-        // }
-
         e := echo.New()
         e.Use(middleware.Logger())
 
         e.Renderer = newTemplate()
 
-        var currentUser user.User
-
-        e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-                return func(c echo.Context) error {
-                        c.Set("db", db)
-                        
-                        cookie, err := cookie.GetCookie(c)
-                        if err != nil {
-                                c.Logger().Debug("User is not logged")
-                                c.Set("user", nil)
-                                return next(c)
-                        }
-
-                        currentUser.SessionUUID = cookie.Value
-
-                        row := db.QueryRow(`
-                        SELECT 
-                                UserUUID, Username, Email
-                        FROM 
-                                userSession
-                        WHERE 
-                                SessionUUID = ?
-                        `, currentUser.SessionUUID)
-
-                        err = row.Scan(&currentUser.UUID, &currentUser.Username, &currentUser.Email)
-                        if err != nil {
-                                c.Logger().Error("Error retrieving user from session", err)
-                                c.Set("user", nil)
-                                return next(c)
-                        }
-
-                        c.Set("user", currentUser)
-
-                        return next(c)
-                }
-        })
+        e.Use(mw.DBMiddleware)
+        e.Use(mw.AuthMiddleware)
 
         e.GET("/", home.GetHomePage)
-        e.POST("/topic", home.PostTopic)
-        e.DELETE("/topic", home.DeleteTopic)
-
         e.GET("/topic/:uuid", topic.GetTopic) 
-        e.POST("/message", topic.PostMessage)
-        e.DELETE("/message", topic.DeleteMessage)
-
+        e.GET("/login", user.GetLogin)
+        e.GET("/register", user.GetRegister)
         e.GET("/*", er404.Get404)
 
-        e.GET("/login", user.GetLogin)
         e.POST("/login", user.PostLogin)
-        e.GET("/register", user.GetRegister)
         e.POST("/register", user.PostRegister)
-        e.GET("/user/:username", user.Profil)
+
+        e.POST("/topic", home.PostTopic)
+        e.POST("/message", topic.PostMessage)
         e.POST("/logout", user.LogOut)
+
+        e.DELETE("/message", topic.DeleteMessage)
+        e.DELETE("/topic", home.DeleteTopic)
+
+        e.GET("/user/:username", user.Profil)
 
         e.Logger.Fatal(e.Start(":42069"))
 }

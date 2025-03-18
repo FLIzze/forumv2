@@ -159,10 +159,7 @@ func CreateView(db *sql.DB) error {
 
 func CreateIndex(db *sql.DB) error {
         _, err := db.Exec(`
-        CREATE INDEX 
-                idx_user_username 
-        ON 
-                user (Username);
+        CREATE INDEX IF NOT EXISTS idx_user_username ON user (Username);
         `)
         return err
 }

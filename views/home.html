@@ -62,6 +62,7 @@
 
 {{ block "home-topic" . }}
         {{ $userUUID := .User.UUID }}
+
         {{ range .Topics }}
                 <a href="topic/{{ .UUID }}">
                         <div>
@@ -75,6 +76,7 @@
                                 NmbMessages: {{ .NmbMessages }}
                         </div>
                 </a>
+
                 {{ if eq $userUUID .CreatedByUUID }}
                         <button 
                                 hx-delete="/topic" 

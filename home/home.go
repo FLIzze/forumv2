@@ -44,7 +44,7 @@ func GetHomePage(c echo.Context) error {
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
-                response.Error = "Could not retrieve topic."
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "home", response)
         }
         defer rows.Close()
@@ -74,7 +74,7 @@ func PostTopic(c echo.Context) error {
 
         if topic.Name == "" || topic.Description == "" {
                 c.Logger().Error("Name and/or description empty")
-                response.Error = "Name and/or description must be filled."
+                response.Error = "Name and description must be filled."
                 return c.Render(422, "topics-form", response)
         }
 

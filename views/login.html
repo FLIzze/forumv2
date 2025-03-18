@@ -28,15 +28,16 @@
 {{ end }}
 
 {{ block "login-form" . }}
-<form
-        hx-post="/login"
-        hx-swap="outerHTML"
->
-        <input type="text" placeholder="username" name="username"/>
-        <input type="password" placeholder="password" name="password"/>
-        <button type="submit">login</button>
-        {{ if .Error }}
-        {{ .Error }}
-        {{ end }}
-</form>
+        <form
+                hx-post="/login"
+                hx-swap="outerHTML"
+        >
+                <input type="text" placeholder="username" name="username"/>
+                <input type="password" placeholder="password" name="password"/>
+                <button type="submit">login</button>
+
+                {{ if .Error }}
+                        {{ .Error }}
+                {{ end }}
+        </form>
 {{ end }}

@@ -28,15 +28,18 @@
 {{ end }}
 
 {{ block "register-form" . }}
-<form
-        hx-post="/register"
-        hx-swap="outerHTML"
->
-        <input type="text" placeholder="account name" name="username"/>
-        <input type="email" placeholder="email" name="email"/>
-        <input type="password" placeholder="password" name="password"/>
-        <input type="password" placeholder="repeat password" name="password-confirm"/>
-        <button type="submit">create account</button>
-        {{ .Error }}
-</form>
+        <form
+                hx-post="/register"
+                hx-swap="outerHTML"
+        >
+                <input type="text" placeholder="account name" name="username"/>
+                <input type="email" placeholder="email" name="email"/>
+                <input type="password" placeholder="password" name="password"/>
+                <input type="password" placeholder="repeat password" name="password-confirm"/>
+                <button type="submit">create account</button>
+
+                {{ if .Errorr }}
+                        {{ .Error }}
+                {{ end }}
+        </form>
 {{ end }}

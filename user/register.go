@@ -33,7 +33,10 @@ func PostRegister(c echo.Context) error {
         db := c.Get("db").(*sql.DB)
 
         rows, err := db.Query(`
-        SELECT Username, Email from user
+        SELECT 
+                Username, Email 
+        FROM 
+                user
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving username", err)
