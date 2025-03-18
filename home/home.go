@@ -12,6 +12,7 @@ import (
 
 type HomeResponse struct {
         Error string
+        Success string
         Topics []Topic
         User user.User
 }
@@ -20,7 +21,8 @@ type Topic struct {
         UUID string
         Name string
         Description string
-        CreatedBy string
+        CreatedByUsername string
+        CreatedByUUID string
         NmbMessages int
 }
 
@@ -36,7 +38,7 @@ func GetHomePage(c echo.Context) error {
 
         rows, err := db.Query(`
         SELECT 
-                UUID, Name, Description, CreatedBy, NmbMessages 
+                UUID, Name, Description, CreatedByUsername, CreatedByUUID, NmbMessages 
         FROM 
                 topicInfo
         `)
@@ -48,17 +50,16 @@ func GetHomePage(c echo.Context) error {
         defer rows.Close()
 
         for rows.Next() {
-                err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedBy, &topic.NmbMessages)
+                err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedByUsername, 
+                                                                &topic.CreatedByUUID, &topic.NmbMessages)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        response.Error = "Internal server error"
+                        response.Error = "Something went wrong. Please try again later."
                         return c.Render(422, "home", response)
                 }
 
                 response.Topics = append(response.Topics, topic)
         }
-
-        c.Logger().Error(user)
 
         return c.Render(200, "home", response)
 }
@@ -77,12 +78,11 @@ func PostTopic(c echo.Context) error {
                 return c.Render(422, "topics-form", response)
         }
 
-        response.Topics = append(response.Topics, topic)
-
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(user.User)
         if !ok {
-                c.Logger().Debug("User is not logged in")
+                response.Error = "You must be logged in to post a topic."
+                return c.Render(401, "topics-form", response)
         } else {
                 response.User = user
         }
@@ -93,10 +93,59 @@ func PostTopic(c echo.Context) error {
         `, topic.UUID, topic.Name, topic.Description, user.UUID, time.Now())
         if err != nil {
                 c.Logger().Error("Error inserting response Topic: ", err)
-                response.Error = "Internal error"
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "topics-form", response)
         }
 
+        row := db.QueryRow(`
+        SELECT 
+                CreatedByUsername, CreatedByUUID, NmbMessages 
+        FROM 
+                topicInfo
+        WHERE 
+                UUID = ?
+        `, topic.UUID)
+        err = row.Scan(&topic.CreatedByUsername, &topic.CreatedByUUID, &topic.NmbMessages)
+        if err != nil {
+                c.Logger().Error("Error fetching new topic: ", err)
+                response.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "topics-form", response)
+        }
+
+        response.Topics = append(response.Topics, topic)
+        response.Success = "Topic succesfully created."
+
         c.Render(200, "topics-form", response)
         return c.Render(200, "oob-topic", response)
+}
+
+func DeleteTopic(c echo.Context) error {
+        response := HomeResponse{}
+
+        db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(user.User)
+        if !ok {
+                response.Error = "You must be logged in to delete a topic."
+                return c.Render(401, "home", response)
+        } else {
+                response.User = user
+        }
+
+        uuid := c.FormValue("uuid")
+
+        _, err := db.Exec(`
+        DELETE FROM
+                topic
+        WHERE 
+                uuid = ?
+        `, uuid)
+        if err != nil {
+                c.Logger().Error("Error deleting from topic", err)
+                response.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "home", response)
+        }
+
+        response.Success = "Topic succesfully deleted."
+
+        return c.Render(200, "home", response)
 }

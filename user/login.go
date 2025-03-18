@@ -65,7 +65,7 @@ func PostLogin(c echo.Context) error {
         `, sessionUUID, response.Login.UUID)
         if err != nil {
                 c.Logger().Error("Error updating session", err)
-                response.Error = "Internal server error"
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "login-form", response)
         }
 

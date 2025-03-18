@@ -44,7 +44,7 @@ func CreateTable(db *sql.DB) error {
                 CreationTime DATETIME NOT NULL,
                 TopicUUID varchar(37) NULL,
                 CreatedBy varchar(37) NULL,
-                FOREIGN KEY (TopicUUID) REFERENCES topic(UUID) ON DELETE SET NULL,
+                FOREIGN KEY (TopicUUID) REFERENCES topic(UUID) ON DELETE CASCADE,
                 FOREIGN KEY (CreatedBy) REFERENCES user(UUID) ON DELETE SET NULL
         )
         `)
@@ -87,7 +87,8 @@ func CreateView(db *sql.DB) error {
                 t.UUID,
                 t.Name,
                 t.Description,
-                u.Username AS CreatedBy,
+                t.CreatedBy AS CreatedByUUID,
+                u.Username AS CreatedByUsername,
                 COUNT(m.UUID) AS NmbMessages,
                 (SELECT 
                         m2.CreationTime
@@ -116,9 +117,11 @@ func CreateView(db *sql.DB) error {
         _, err = db.Exec(`
         CREATE VIEW IF NOT EXISTS messageInfo AS 
         SELECT 
+                m.UUID, 
                 m.TopicUUID,
                 m.Content, 
-                u.Username as CreatedBy 
+                u.Username as CreatedByUsername,
+                u.UUID as CreatedByUUID
         FROM 
                 message m 
         JOIN 

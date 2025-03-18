@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+        "github.com/Masterminds/sprig/v3"
 
 	er404 "forum/er404"
 	home "forum/home"
@@ -27,9 +28,7 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 }
 
 func newTemplate() *Templates {
-	funcMap := template.FuncMap{
-		"mod": func(a, b int) int { return a % b }, 
-	}
+        funcMap := sprig.FuncMap()
 
 	return &Templates{
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("views/*.html")),
@@ -91,6 +90,8 @@ func main() {
                         err = row.Scan(&currentUser.UUID, &currentUser.Username, &currentUser.Email)
                         if err != nil {
                                 c.Logger().Error("Error retrieving user from session", err)
+                                c.Set("user", nil)
+                                return next(c)
                         }
 
                         c.Set("user", currentUser)
@@ -100,10 +101,12 @@ func main() {
         })
 
         e.GET("/", home.GetHomePage)
-        e.POST("/postTopic", home.PostTopic)
+        e.POST("/topic", home.PostTopic)
+        e.DELETE("/topic", home.DeleteTopic)
 
         e.GET("/topic/:uuid", topic.GetTopic) 
-        e.POST("/postMessage", topic.PostMessage)
+        e.POST("/message", topic.PostMessage)
+        e.DELETE("/message", topic.DeleteMessage)
 
         e.GET("/*", er404.Get404)
 

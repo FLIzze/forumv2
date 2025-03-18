@@ -30,45 +30,61 @@
 {{ end }}
 
 {{ block "topic-form" . }}
-<form 
-        hx-post="/postMessage"
-        hx-vals='{"uuid": "{{ .Subject.UUID }}"}'
-        id="topic-form"
-        hx-on::after-request="this.reset()"
->
-        {{ if .User.UUID }}
-        <input type="text" name="message" placeholder="message"/>
-        <button type="submit">add</button>
-        {{ if .Error }}
-        {{ .Error }}
-        {{ end }}
-        {{ else }}
-        <p>Login to post a message</p>
-        {{ end }}
-</form>
+        <form 
+                hx-post="/message"
+                hx-vals='{"uuid": "{{ .Subject.UUID }}"}'
+                id="topic-form"
+                hx-on::after-request="this.reset()"
+        >
+                {{ if .User.UUID }}
+                        <input type="text" name="message" placeholder="message"/>
+                        <button type="submit">add</button>
+                {{ else }}
+                        <p>Login to post a message</p>
+                {{ end }}
+
+                {{ if .Error }}
+                        {{ .Error }}
+                {{ end }}
+
+                {{ if .Success }}
+                        {{ .Success }}
+                {{ end }}
+        </form>
 {{ end }}
 
 {{ block "topic-subject" . }}
-<div>
-        Name: {{ .Subject.Name }}
-        <br/>
-        Description: {{ .Subject.Description }}
-</div>
-<br/>
+        <div>
+                <br/>
+                Name: {{ .Subject.Name }}
+                <br/>
+                Description: {{ .Subject.Description }}
+        </div>
 {{ end }}
 
 {{ block "topic-message" . }}
-<div id="topics-displayed">
-        {{ range .Messages }}
-        {{ .Content }} - {{ .CreatedBy }}
-        {{ end }}
-</div>
+        <div id="message-display">
+                {{ template "message-display" . }}
+        </div>
 {{ end }}
 
-{{ block "oob-created-topic" . }}
-<div id="topics-displayed" hx-swap-oob="afterbegin">
-        {{ if .Content }}
-        {{ .Content }}
+{{ block "message-display" . }}
+        {{ $userUUID := .User.UUID }}
+        {{ range .Messages }}
+                {{ .Content }} - {{ .CreatedByUsername }}
+                {{ if eq $userUUID .CreatedByUUID }}
+                        <button
+                                hx-delete="/message"
+                                hx-vals='{"uuid": "{{ .UUID }}"}'
+                                hx-swap="outerHTML"
+                        > Delete </button>
+                {{ end }}
+                <br/>
         {{ end }}
-</div>
+{{ end }}
+
+{{ block "oob-message" . }}
+        <div id="message-display" hx-swap-oob="afterbegin">
+                {{ template "message-display" . }}
+        </div>
 {{ end }}

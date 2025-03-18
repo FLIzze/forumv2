@@ -37,7 +37,7 @@ func PostRegister(c echo.Context) error {
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving username", err)
-                response.Error = "Internal server error"
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "register-form", response)
         }
         defer rows.Close()
@@ -49,7 +49,7 @@ func PostRegister(c echo.Context) error {
                 err := rows.Scan(&existingUsername, &existingEmail)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        response.Error = "Internal server error"
+                        response.Error = "Something went wrong. Please try again later."
                         return c.Render(422, "register-form", response)
                 }
 
@@ -75,7 +75,7 @@ func PostRegister(c echo.Context) error {
         hashedPassword, err := utils.GenerateHash(password)
         if err != nil {
                 c.Logger().Error("Error hashing password: %s", err)
-                response.Error = "Internal server error"
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "register-form", response)
         }
 
@@ -90,7 +90,7 @@ func PostRegister(c echo.Context) error {
         `, userUUID, username, email, hashedPassword, time.Now())
         if err != nil {
                 c.Logger().Error("Error inserting user: %s", err)
-                response.Error = "Internal server error"
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "register", response)
         }
 
@@ -100,7 +100,7 @@ func PostRegister(c echo.Context) error {
         `, utils.Uuid(), userUUID)
         if err != nil {
                 c.Logger().Error("Error inserting session: %s", err)
-                response.Error = "Internal server error"
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "register", response)
         }
 

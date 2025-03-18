@@ -13,6 +13,7 @@ import (
 
 type TopicResponse struct {
         Error string
+        Success string
         Subject Subject
         Messages []Message
         User user.User
@@ -28,7 +29,8 @@ type Message struct {
         UUID string
         TopicUUID string
         Content template.HTML
-        CreatedBy string
+        CreatedByUsername string
+        CreatedByUUID string
 }
 
 func GetTopic(c echo.Context) error {
@@ -62,7 +64,7 @@ func GetTopic(c echo.Context) error {
 
         rows, err := db.Query(`
         SELECT 
-                Content, CreatedBy
+                UUID, Content, CreatedByUsername, CreatedByUUID
         FROM 
                 messageInfo
         WHERE 
@@ -78,10 +80,10 @@ func GetTopic(c echo.Context) error {
 
         for rows.Next() {
                 message := Message{}
-                err := rows.Scan(&message.Content, &message.CreatedBy)
+                err := rows.Scan(&message.UUID, &message.Content, &message.CreatedByUsername, &message.CreatedByUUID)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
-                        response.Error = "Internal server error"
+                        response.Error = "Something went wrong. Please try again later."
                         return c.Render(500, "topic", response)
                 }
 
@@ -105,12 +107,11 @@ func PostMessage(c echo.Context) error {
                 return c.Render(422, "topic-form", response)
         }
 
-        response.Messages = append(response.Messages, message)
-
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(user.User)
         if !ok {
-                c.Logger().Debug("User is not logged in")
+                response.Error = "You must be logged in to post a message."
+                return c.Render(401, "topic", response)
         } else {
                 response.User = user
         }
@@ -120,11 +121,60 @@ func PostMessage(c echo.Context) error {
         VALUES (?, ?, ?, ?, ?)
         `, message.UUID, message.TopicUUID, message.Content, user.UUID, time.Now())
         if err != nil {
-                c.Logger().Error("Error retrieving response.Topic: ", err)
-                response.Error = "Internal server error"
+                c.Logger().Error("Error inserting into message", err)
+                response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "topic-form", response)
         }
 
+        row := db.QueryRow(`
+        SELECT 
+                CreatedByUsername, CreatedByUUID
+        FROM 
+                messageInfo
+        WHERE
+                uuid = ?
+        `, message.UUID)
+        err = row.Scan(&message.CreatedByUsername, &message.CreatedByUUID)
+        if err != nil {
+                c.Logger().Error("Error retrieving from messageInfo", err)
+                response.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "topic-form", response)
+        }
+
+        response.Messages = append(response.Messages, message)
+        response.Success = "Message sucessfully posted."
+
         c.Render(200, "topic-form", response)
-        return c.Render(200, "oob-created-topic", message)
+        return c.Render(200, "oob-message", response)
+}
+
+func DeleteMessage(c echo.Context) error {
+        response := TopicResponse{}
+
+        db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(user.User)
+        if !ok {
+                response.Error = "You must be logged in to delete a message."
+                return c.Render(401, "topic", response)
+        } else {
+                response.User = user
+        }
+
+        uuid := c.FormValue("uuid")
+
+        _, err := db.Exec(`
+        DELETE FROM 
+                message
+        WHERE 
+               uuid = ? 
+        `, uuid)
+        if err != nil {
+                c.Logger().Error("Error deleting from message", err)
+                response.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "topic", response)
+        }
+
+        response.Success = "Message succesfully deleted."
+
+        return c.Render(200, "topic", response)
 }

@@ -29,53 +29,64 @@
 {{ end }}
 
 {{ block "topics-form" . }}
-<form 
-        hx-post="/postTopic" 
-        hx-on::after-request="this.reset()"
-        id="topics-form"
-        class="mb-4"
->
-        {{ if .User.UUID }}
-        <input type="text" name="name" placeholder="name"/>
-        <input type="text" name="description" placeholder="description"/>
-        <button type="submit">add</button>
-        <br>
-        {{ if .Error }}
-        <span style="coUsernamelor: red;">{{ .Error }}</span>
-        {{ end }}
-        {{ else }}
-        <p>Login to post a topic</p>
-        {{ end }}
-</form>
+        <form 
+                hx-post="/topic" 
+                hx-on::after-request="this.reset()"
+                id="topics-form"
+                class="mb-4"
+        >
+                {{ if .User.UUID }}
+                        <input type="text" name="name" placeholder="name"/>
+                        <input type="text" name="description" placeholder="description"/>
+                        <button type="submit">add</button>
+                        <br>
+                {{ else }}
+                        <p>Login to post a topic</p>
+                {{ end }}
+
+                {{ if .Error }}
+                        {{ .Error }}
+                {{ end }}
+
+                {{ if .Success }}
+                        {{ .Success }}
+                {{ end }}
+        </form>
 {{ end }}
 
 {{ block "topics-display" . }}
-<div id="topics-display">
-        {{ range .Topics }}
-        {{ template "home-topic" . }}
-        {{ end }}
-</div>
+        <div id="topic-display">
+                {{ template "home-topic" . }}
+        </div>
 {{ end }}
 
 {{ block "home-topic" . }}
-<a href="topic/{{ .UUID }}">
-        <div>
-                Name: {{ .Name }}
-                </br>
-                Description: {{ .Description }}
-                </br>
-                By: {{ .CreatedBy }}
-                </br>
-                NmbMessages: {{ .NmbMessages }}
-        </div>
-        </br>
-</a>
+        {{ $userUUID := .User.UUID }}
+        {{ range .Topics }}
+                <a href="topic/{{ .UUID }}">
+                        <div>
+                                </br>
+                                Name: {{ .Name }}
+                                </br>
+                                Description: {{ .Description }}
+                                </br>
+                                By: {{ .CreatedByUsername }}
+                                </br>
+                                NmbMessages: {{ .NmbMessages }}
+                        </div>
+                </a>
+                {{ if eq $userUUID .CreatedByUUID }}
+                        <button 
+                                hx-delete="/topic" 
+                                hx-vals='{"uuid": "{{ .UUID }}"}'
+                                hx-swap="outerHTML"
+                        > Delete</button>
+                {{ end }}
+        {{ end }}
 {{ end }}
 
 {{ block "oob-topic" . }}
-<div id="topics-display" hx-swap-oob="afterbegin">
-        {{ range .Topics }}
-        {{ template "home-topic" . }}
-        {{ end }}
-</div>
+        <div id="topic-display" hx-swap-oob="afterbegin">
+                {{ template "home-topic" . }}
+        </div>
 {{ end }}
