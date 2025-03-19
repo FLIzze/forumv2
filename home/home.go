@@ -22,7 +22,7 @@ func GetHomePage(c echo.Context) error {
 
         rows, err := db.Query(`
         SELECT 
-                UUID, Name, Description, CreatedByUsername, CreatedByUUID, NmbMessages 
+                UUID, Name, Description, CreatedByUsername, CreatedByUUID, NmbMessages, LastMessage
         FROM 
                 topicInfo
         `)
@@ -35,7 +35,7 @@ func GetHomePage(c echo.Context) error {
 
         for rows.Next() {
                 err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedByUsername, 
-                                                                &topic.CreatedByUUID, &topic.NmbMessages)
+                                        &topic.CreatedByUUID, &topic.NmbMessages, &topic.LastMessage)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
                         response.Status.Error = "Something went wrong. Please try again later."

@@ -1,11 +1,18 @@
 package forum
 
 import (
-        "database/sql"
+	"database/sql"
+	"fmt"
+	"os"
 )
 
 func ConnectDb() (*sql.DB, error) {
-        db, err := sql.Open("mysql", "admin:1231@/forum?parseTime=true")
+        user := os.Getenv("DB_USER")
+        password := os.Getenv("DB_PASSWORD")
+
+        credentials := fmt.Sprintf("%s:%s/forum?parseTime=true", user, password)
+
+        db, err := sql.Open("mysql", credentials)
         return db, err
 }
 

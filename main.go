@@ -3,17 +3,18 @@ package main
 import (
 	"html/template"
 	"io"
+	"os"
 
+	"github.com/Masterminds/sprig/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-        "github.com/Masterminds/sprig/v3"
 
 	er404 "forum/er404"
 	home "forum/home"
+	mw "forum/middleware"
 	topic "forum/topic"
-        user "forum/user"
-        mw "forum/middleware"
+	user "forum/user"
 )
 
 type Templates struct {
@@ -61,5 +62,6 @@ func main() {
 
         e.GET("/user/:username", user.GetProfil)
 
-        e.Logger.Fatal(e.Start(":42069"))
+        port := os.Getenv("PORT")
+        e.Logger.Fatal(e.Start(":"+ port))
 }

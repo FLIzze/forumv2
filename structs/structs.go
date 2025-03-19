@@ -29,6 +29,7 @@ type Topic struct {
         CreatedByUsername string
         CreatedByUUID string
         NmbMessages int
+        LastMessage *time.Time
 }
 
 type TopicResponse struct {
