@@ -26,7 +26,7 @@ func CreateTable(db *sql.DB) error {
         _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS topic (
                 UUID varchar(37) NOT NULL PRIMARY KEY, 
-                Name varchar(25) NOT NULL, 
+                Name varchar(95) NOT NULL, 
                 Description text NOT NULL,
                 CreatedBy varchar(37) NULL,
                 FOREIGN KEY (CreatedBy) REFERENCES user(UUID) ON DELETE SET NULL,
@@ -120,6 +120,7 @@ func CreateView(db *sql.DB) error {
                 m.UUID, 
                 m.TopicUUID,
                 m.Content, 
+                m.CreationTime,
                 u.Username as CreatedByUsername,
                 u.UUID as CreatedByUUID
         FROM 

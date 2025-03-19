@@ -11,12 +11,8 @@
                 </script>
         </head>
         <body>
-                {{ if .Status.Error }}
-                        {{ .Status.Error }}
-                {{ else }}
-                        {{ template "navbar" . }}
-                        {{ template "userInfo" .UserProfil }}
-                {{ end }}
+                {{ template "navbar" . }}
+                {{ template "userInfo" .UserProfil }}
         </body>
 </html>
 {{ end }}

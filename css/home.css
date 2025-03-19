@@ -1,0 +1,15 @@
+* {
+        margin: 0;
+        padding: 0;
+}
+
+.table-header {
+        text-align: left;
+        color: white;
+        background-color: black;
+}
+
+.table {
+        margin-top: 35px;
+        justify-content: center;
+}

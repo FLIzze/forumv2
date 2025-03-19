@@ -9,11 +9,17 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link rel="stylesheet" href="/css/home.css">
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "topics-form" . }}
-                {{ template "topics-display" . }}
+                {{ template "home-form" . }}
+
+                <div class="home-status">
+                        {{ template "home-status" . }}
+                </div>
+
+                {{ template "home-table" . }}
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
                                 document.body.addEventListener("htmx:beforeSwap", function(evt) {
@@ -28,12 +34,27 @@
 </html>
 {{ end }}
 
-{{ block "topics-form" . }}
+{{ block "home-table" . }}
+        <table class="table">
+                {{ template "home-table-header" . }}
+
+                <tbody id="topic-display">
+                        {{ template "home-table-content" . }}
+                </tbody>
+        </table>
+{{ end }}
+
+{{ block "home-status" . }}
+        {{ template "status" .Status }}
+{{ end }}
+
+{{ block "home-form" . }}
         <form 
                 hx-post="/topic" 
                 hx-on::after-request="this.reset()"
                 id="topics-form"
                 class="mb-4"
+                hx-target=".home-status"
         >
                 {{ if .User.UUID }}
                         <input type="text" name="name" placeholder="name"/>
@@ -43,55 +64,41 @@
                 {{ else }}
                         <p>Login to post a topic</p>
                 {{ end }}
-
-                {{ if .Status.Error }}
-                        {{ .Status.Error }}
-                {{ end }}
-
-                {{ if .Status.Success }}
-                        {{ .Status.Success }}
-                {{ end }}
         </form>
 {{ end }}
 
-{{ block "topics-display" . }}
-        <div id="topic-display">
-                {{ template "home-topic" . }}
-        </div>
+{{ block "home-table-header" . }}
+        <tr class="table-header">
+                <th>Name</th>
+                <th>Author</th>
+                <th>NmbMessage</th>
+                <th>Delete</th>
+        </tr>
 {{ end }}
 
-{{ block "home-topic" . }}
+{{ block "home-table-content" . }}
         {{ $userUUID := .User.UUID }}
 
         {{ range .Topics }}
-        <div id="topic{{ .UUID }}">
-                        <a href="topic/{{ .UUID }}">
-                                <div>
-                                        </br>
-                                        Name: {{ .Name }}
-                                        </br>
-                                        Description: {{ .Description }}
-                                        </br>
-                                        By: {{ .CreatedByUsername }}
-                                        </br>
-                                        NmbMessages: {{ .NmbMessages }}
-                                </div>
-                        </a>
+                <tr class="table-content" id="topic{{ .UUID }}">
+                        <td><a href="/topic/{{ .UUID }}">{{ .Name }}</a></td>
+                        <td><a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a></td>
+                        <td>{{ .NmbMessages }}</td>
 
                         {{ if eq $userUUID .CreatedByUUID }}
-                                <button 
+                                <td><button 
                                         hx-delete="/topic" 
                                         hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
                                         hx-swap="outerHTML"
                                         hx-target="#topic{{ .UUID }}"
-                                > Delete</button>
+                                > Delete</button></td>
                         {{ end }}
-                </div>
+                </tr>
         {{ end }}
 {{ end }}
 
 {{ block "oob-topic" . }}
-        <div id="topic-display" hx-swap-oob="afterbegin">
-                {{ template "home-topic" . }}
-        </div>
+        <tbody id="topic-display" hx-swap-oob="afterbegin">
+                {{ template "home-table-content" . }}
+        </tbody>
 {{ end }}

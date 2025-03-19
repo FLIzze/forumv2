@@ -12,7 +12,7 @@ type User struct {
         Email string
         NmbMessagesPosted int
         NmbTopicsCreated int
-        LastMessage string
+        LastMessage *string
         CreationTime time.Time
 }
 
@@ -42,6 +42,7 @@ type Subject struct {
         UUID string
         Name string
         Description string
+        CreatedByUsername string
 }
 
 type Message struct {
@@ -50,6 +51,7 @@ type Message struct {
         Content template.HTML
         CreatedByUsername string
         CreatedByUUID string
+        CreationTime time.Time
 }
 
 type ProfilResponse struct {

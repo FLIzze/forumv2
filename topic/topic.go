@@ -23,14 +23,15 @@ func GetTopic(c echo.Context) error {
 
         row := db.QueryRow(`
         SELECT 
-                UUID, Name, Description 
+                UUID, Name, Description, CreatedByUsername
         FROM 
-                topic
+                topicInfo
         WHERE 
                 UUID = ?
         `, UUID)
 
-        err := row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description)
+        err := row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description, 
+                                                                        &response.Subject.CreatedByUsername)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
                 response.Status.Error = "Could not retrieve topic."
@@ -39,7 +40,7 @@ func GetTopic(c echo.Context) error {
 
         rows, err := db.Query(`
         SELECT 
-                UUID, Content, CreatedByUsername, CreatedByUUID
+                UUID, Content, CreatedByUsername, CreatedByUUID, CreationTime
         FROM 
                 messageInfo
         WHERE 
@@ -55,7 +56,8 @@ func GetTopic(c echo.Context) error {
 
         for rows.Next() {
                 message := structs.Message{}
-                err := rows.Scan(&message.UUID, &message.Content, &message.CreatedByUsername, &message.CreatedByUUID)
+                err := rows.Scan(&message.UUID, &message.Content, &message.CreatedByUsername, &message.CreatedByUUID, 
+                                                                                                &message.CreationTime)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
                         response.Status.Error = "Something went wrong. Please try again later."
@@ -79,7 +81,7 @@ func PostMessage(c echo.Context) error {
         if message.Content == "" {
                 c.Logger().Error("Message empty")
                 response.Status.Error = "Message must be filled"
-                return c.Render(422, "topic-form", response)
+                return c.Render(422, "topic-status", response)
         }
 
         db := c.Get("db").(*sql.DB)
@@ -95,7 +97,7 @@ func PostMessage(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error inserting into message", err)
                 response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "topic-form", response)
+                return c.Render(500, "topic-status", response)
         }
 
         row := db.QueryRow(`
@@ -110,26 +112,30 @@ func PostMessage(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error retrieving from messageInfo", err)
                 response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "topic-form", response)
+                return c.Render(500, "topic-status", response)
         }
 
         response.Messages = append(response.Messages, message)
         response.Status.Success = "Message sucessfully posted."
 
-        c.Render(200, "topic-form", response)
+        c.Render(200, "topic-status", response)
         return c.Render(200, "oob-message", response)
 }
 
 func DeleteMessage(c echo.Context) error {
+        response := structs.TopicResponse{}
+
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
         if !ok {
-                return c.String(401, "You must be logged in to delete a topic.")
+                response.Status.Error = "You must be logged in to delete a topic."
+                return c.Render(401, "topic-status", response)
         }
 
         createdBy := c.FormValue("createdBy")
         if createdBy != user.UUID {
-                return c.String(401, "You must own the message to delete it.")
+                response.Status.Error = "You must own the message to delete it."
+                return c.Render(401, "topic-status", response)
         }
 
         uuid := c.FormValue("uuid")
@@ -142,7 +148,8 @@ func DeleteMessage(c echo.Context) error {
         `, uuid)
         if err != nil {
                 c.Logger().Error("Error deleting from message", err)
-                return c.String(500, "Something went wrong. Please try again later.")
+                response.Status.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "topic-status", response)
         }
 
         return c.NoContent(200)

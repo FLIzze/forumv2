@@ -8,7 +8,7 @@ import (
         structs "forum/structs"
 )
 
-func Profil(c echo.Context) error {
+func GetProfil(c echo.Context) error {
         response := structs.ProfilResponse{} 
         user := structs.User{}
 

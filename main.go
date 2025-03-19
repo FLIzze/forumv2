@@ -36,6 +36,8 @@ func main() {
         e := echo.New()
         e.Use(middleware.Logger())
 
+        e.Static("/css", "css")
+
         e.Renderer = newTemplate()
 
         e.Use(mw.DBMiddleware)
@@ -57,7 +59,7 @@ func main() {
         e.DELETE("/message", topic.DeleteMessage)
         e.DELETE("/topic", home.DeleteTopic)
 
-        e.GET("/user/:username", user.Profil)
+        e.GET("/user/:username", user.GetProfil)
 
         e.Logger.Fatal(e.Start(":42069"))
 }

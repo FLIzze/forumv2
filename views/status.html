@@ -1,0 +1,9 @@
+{{ block "status" .Status }}
+        {{ if .Error }}
+                {{ .Error }}
+        {{ end }}
+
+        {{ if .Success }}
+                {{ .Success }}
+        {{ end }}
+{{ end }}

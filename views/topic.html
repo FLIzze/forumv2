@@ -9,10 +9,14 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link rel="stylesheet" href="/css/topic.css">
         </head>
         <body>
                 {{ template "navbar" . }}
                 {{ template "topic-form" . }}
+                <div class="topic-status">
+                        {{ template "topic-status" . }}
+                </div>
                 {{ template "topic-subject" . }}
                 {{ template "topic-message" . }}
                 <script>
@@ -29,12 +33,17 @@
 </html>
 {{ end }}
 
+{{ block "topic-status" . }}
+        {{ template "status" .Status }}
+{{ end }}
+
 {{ block "topic-form" . }}
         <form 
                 hx-post="/message"
                 hx-vals='{"uuid": "{{ .Subject.UUID }}"}'
                 id="topic-form"
                 hx-on::after-request="this.reset()"
+                hx-target=".topic-status"
         >
                 {{ if .User.UUID }}
                         <input type="text" name="message" placeholder="message"/>
@@ -43,23 +52,12 @@
                         <p>Login to post a message</p>
                 {{ end }}
 
-                {{ if .Status.Error }}
-                        {{ .Status.Error }}
-                {{ end }}
-
-                {{ if .Status.Success }}
-                        {{ .Status.Success }}
-                {{ end }}
+                </br>
         </form>
 {{ end }}
 
 {{ block "topic-subject" . }}
-        <div>
-                <br/>
-                Name: {{ .Subject.Name }}
-                <br/>
-                Description: {{ .Subject.Description }}
-        </div>
+        <div class="topic-subject">Subject: {{ .Subject.Name }}</div>
 {{ end }}
 
 {{ block "topic-message" . }}
@@ -72,8 +70,9 @@
         {{ $userUUID := .User.UUID }}
 
         {{ range .Messages }}
-                <div id="message{{ .UUID }}">
-                        {{ .Content }} - {{ .CreatedByUsername }}
+                <div id="message{{ .UUID }}" class="message">
+                        <a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a> - {{ .CreationTime }}
+                        {{ .Content }}
                         {{ if eq $userUUID .CreatedByUUID }}
                                 <button
                                         hx-delete="/message"

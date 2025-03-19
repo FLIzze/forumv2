@@ -57,16 +57,15 @@ func PostTopic(c echo.Context) error {
         topic.Description = c.FormValue("description")
 
         if topic.Name == "" || topic.Description == "" {
-                c.Logger().Error("Name and/or description empty")
                 response.Status.Error = "Name and description must be filled."
-                return c.Render(422, "topics-form", response)
+                return c.Render(422, "home-status", response)
         }
 
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
         if !ok {
                 response.Status.Error = "You must be logged in to post a topic."
-                return c.Render(401, "topics-form", response)
+                return c.Render(401, "home-status", response)
         } else {
                 response.User = user
         }
@@ -78,7 +77,7 @@ func PostTopic(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error inserting response Topic: ", err)
                 response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "topics-form", response)
+                return c.Render(500, "home-status", response)
         }
 
         row := db.QueryRow(`
@@ -93,26 +92,30 @@ func PostTopic(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error fetching new topic: ", err)
                 response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "topics-form", response)
+                return c.Render(500, "home-status", response)
         }
 
         response.Topics = append(response.Topics, topic)
         response.Status.Success = "Topic succesfully created."
 
-        c.Render(200, "topics-form", response)
-        return c.Render(200, "oob-topic", response)
+        c.Render(200, "oob-topic", response)
+        return c.Render(200, "home-status", response)
 }
 
 func DeleteTopic(c echo.Context) error {
+        response := structs.HomeResponse{}
+
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
         if !ok {
-                return c.String(401, "You must be logged in to delete a topic.")
+                response.Status.Error = "You must be logged in to delete a topic."
+                return c.Render(401, "home-status", response)
         }
 
         createdBy := c.FormValue("createdBy")
         if createdBy != user.UUID {
-                return c.String(401, "You must own the topic to delete it.")
+                response.Status.Error = "You must own the topic to delete it."
+                return c.Render(401, "home-status", response)
         }
 
         uuid := c.FormValue("uuid")
@@ -125,7 +128,8 @@ func DeleteTopic(c echo.Context) error {
         `, uuid)
         if err != nil {
                 c.Logger().Error("Error deleting from topic", err)
-                return c.String(500, "Topic not found.")
+                response.Status.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "home-status", response)
         }
 
         return c.NoContent(200)
