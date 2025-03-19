@@ -1,16 +1,14 @@
 package forum
 
 import (
-        "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 
-        cookie "forum/cookie"
-        structs "forum/structs"
+	cookie "forum/cookie"
 )
 
 func LogOut(c echo.Context) error {
-        response := structs.User{}
-
         cookie.RemoveCookie(c)
 
-        return c.Render(200, "navbar", response)
+        c.Response().Header().Set("HX-Redirect", "/")
+	return c.NoContent(200)
 }

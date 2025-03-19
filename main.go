@@ -63,6 +63,8 @@ func main() {
         e.GET("/topic/:uuid", topic.GetTopic) 
         e.GET("/login", user.GetLogin)
         e.GET("/register", user.GetRegister)
+        e.GET("/me", user.GetMeProfil)
+        e.GET("/user/:username", user.GetProfil)
         e.GET("/*", er404.Get404)
 
         e.POST("/login", user.PostLogin)
@@ -74,8 +76,6 @@ func main() {
 
         e.DELETE("/message", topic.DeleteMessage)
         e.DELETE("/topic", home.DeleteTopic)
-
-        e.GET("/user/:username", user.GetProfil)
 
         PORT := os.Getenv("PORT")
         if PORT == "" {

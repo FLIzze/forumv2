@@ -177,7 +177,7 @@ func CreateView(db *sql.DB) error {
 func HandleDbSetup() *sql.DB {
         db, err := ConnectDb()
         if err != nil {
-                log.Fatal("Error connecting to db")        
+                log.Fatal("Error connecting to db", err)        
         }
 
         err = CreateTable(db)

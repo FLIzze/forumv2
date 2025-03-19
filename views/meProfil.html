@@ -1,0 +1,34 @@
+{{ block "meProfil" . }}
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>forumv2</title>
+                <script src="https://unpkg.com/htmx.org@2.0.4" 
+                        integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
+                        crossorigin="anonymous">
+                </script>
+                <link rel="stylesheet" href="/css/meProfil.css">
+        </head>
+        <body>
+                <a href="/">home</a>
+                </br>
+                <button 
+                        hx-post="/logout"
+                        hx-swap="outerHTML"
+                >logout</button>
+
+                </br>
+                {{ .User.Username }}
+                </br>
+                {{ .User.CreationTime }}
+                </br>
+                {{ .User.NmbMessagesPosted }}
+                </br>
+                {{ .User.NmbTopicsCreated }}
+                </br>
+                {{ .User.LastMessage }}
+        </body>
+</html>
+{{ end }}

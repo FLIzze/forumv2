@@ -21,8 +21,9 @@
                 </script>
         </head>
         <body>
-                {{ template "navbar" . }}
+                <a href="/">home</a>
                 {{ template "register-form" . }}
+                {{ template "goto-login" . }}
         </body>
 </html>
 {{ end }}
@@ -38,4 +39,8 @@
                 <input type="password" placeholder="repeat password" name="password-confirm"/>
                 <button type="submit">create account</button>
         </form>
+{{ end }}
+
+{{ block "goto-login" . }}
+        <p>Alreayd have an account ?<a href="/login">login</a></p>
 {{ end }}

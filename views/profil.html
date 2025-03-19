@@ -12,12 +12,17 @@
         </head>
         <body>
                 {{ template "navbar" . }}
+                {{ template "profil-status" . }}
                 {{ template "userInfo" .UserProfil }}
         </body>
 </html>
 {{ end }}
 
-{{ block "userInfo" . }}
+{{ block "profil-status" . }}
+        {{ template "status" .Status }}
+{{ end }}
+
+{{ block "userInfo" .UserProfil }}
         </br>
         </br>
         Username: {{ .Username }}

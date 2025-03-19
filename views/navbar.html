@@ -9,18 +9,19 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link rel="stylesheet" href="/css/navbar.css">
         </head>
         <body>
-                {{ if .User.UUID }}
-                        <p>Hi {{ .User.Username }}</p>
-                        <a hx-swap="outerHTML" hx-post="/logout" href="/">Logout</a>
-                        <a href="/user/{{ .User.Username }}">profil</a>
-                {{ else }}
-                        <a href="/register">register</a>
-                        <a href="/login">login</a>
-                {{ end }}
+                <div class="navbar">
+                        <a href="/">home</a>
 
-                <a href="/">home</a>
+                        {{ if .User.UUID }}
+                                <a href="/me">profil</a>
+                                <p>Hi {{ .User.Username }}</p>
+                        {{ else }}
+                                <a href="/login">login</a>
+                        {{ end }}
+                </div>
         </body>
 </html>
 {{ end }}
