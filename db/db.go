@@ -3,17 +3,26 @@ package forum
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 )
 
 func ConnectDb() (*sql.DB, error) {
-        user := os.Getenv("DB_USER")
-        password := os.Getenv("DB_PASSWORD")
+        USER := os.Getenv("DB_USER")
+        PASSWORD := os.Getenv("DB_PASSWORD")
 
-        credentials := fmt.Sprintf("%s:%s/forum?parseTime=true", user, password)
+        if USER == "" || PASSWORD == "" {
+                log.Fatal("DB_USER or DB_PASSWORD is not set in the environment variables")
+        }
+
+        credentials := fmt.Sprintf("%s:%s@/forum?parseTime=true", USER, PASSWORD)
 
         db, err := sql.Open("mysql", credentials)
-        return db, err
+        if err != nil {
+                return nil, err
+        }
+
+        return db, nil
 }
 
 func CreateTable(db *sql.DB) error {
@@ -163,4 +172,23 @@ func CreateView(db *sql.DB) error {
         `)
 
         return err
+}
+
+func HandleDbSetup() *sql.DB {
+        db, err := ConnectDb()
+        if err != nil {
+                log.Fatal("Error connecting to db")        
+        }
+
+        err = CreateTable(db)
+        if err != nil {
+                log.Fatal("Error creating tables:", err)
+        }
+
+        err = CreateView(db)
+        if err != nil {
+                log.Fatal("Error creating views:", err)
+        }
+
+        return db
 }

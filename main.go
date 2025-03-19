@@ -3,10 +3,12 @@ package main
 import (
 	"html/template"
 	"io"
-	"os"
+	"log"
+        "os"
 
 	"github.com/Masterminds/sprig/v3"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -15,6 +17,7 @@ import (
 	mw "forum/middleware"
 	topic "forum/topic"
 	user "forum/user"
+        dbi "forum/db"
 )
 
 type Templates struct {
@@ -34,6 +37,11 @@ func newTemplate() *Templates {
 }
 
 func main() {
+        err := godotenv.Load(".env")
+        if err != nil {
+                log.Fatal("Error loading .env file")        
+        }
+
         e := echo.New()
         e.Use(middleware.Logger())
 
@@ -41,7 +49,14 @@ func main() {
 
         e.Renderer = newTemplate()
 
-        e.Use(mw.DBMiddleware)
+        db := dbi.HandleDbSetup()
+
+        e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+                return func(c echo.Context) error {
+                        c.Set("db", db)
+                        return next(c)
+                }
+        })
         e.Use(mw.AuthMiddleware)
 
         e.GET("/", home.GetHomePage)
@@ -62,6 +77,9 @@ func main() {
 
         e.GET("/user/:username", user.GetProfil)
 
-        port := os.Getenv("PORT")
-        e.Logger.Fatal(e.Start(":"+ port))
+        PORT := os.Getenv("PORT")
+        if PORT == "" {
+                PORT = "8080"  
+        }
+        e.Logger.Fatal(e.Start(":"+ PORT))
 }

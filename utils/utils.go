@@ -8,7 +8,7 @@ import (
         structs "forum/structs"
 )
 
-func GetDB(c echo.Context) (*sql.DB, error) {
+func GetDb(c echo.Context) (*sql.DB, error) {
         db, ok := c.Get("db").(*sql.DB)
         if !ok {
 		return nil, echo.NewHTTPError(500, "Something went wrong. Please try again later.")
