@@ -12,8 +12,8 @@ type User struct {
         Email string
         NmbMessagesPosted int
         NmbTopicsCreated int
+        LastMessage string
         CreationTime time.Time
-        LastMessage *time.Time
 }
 
 type HomeResponse struct {

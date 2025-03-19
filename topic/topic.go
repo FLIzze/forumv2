@@ -121,12 +121,15 @@ func PostMessage(c echo.Context) error {
 }
 
 func DeleteMessage(c echo.Context) error {
-        response := structs.TopicResponse{}
-
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
-        if ok {
-                response.User = user
+        if !ok {
+                return c.String(401, "You must be logged in to delete a topic.")
+        }
+
+        createdBy := c.FormValue("createdBy")
+        if createdBy != user.UUID {
+                return c.String(401, "You must own the message to delete it.")
         }
 
         uuid := c.FormValue("uuid")
@@ -139,11 +142,8 @@ func DeleteMessage(c echo.Context) error {
         `, uuid)
         if err != nil {
                 c.Logger().Error("Error deleting from message", err)
-                response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "topic", response)
+                return c.String(500, "Something went wrong. Please try again later.")
         }
 
-        response.Status.Success = "Message succesfully deleted."
-
-        return c.Render(200, "topic", response)
+        return c.NoContent(200)
 }

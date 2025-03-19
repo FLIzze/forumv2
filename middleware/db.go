@@ -29,12 +29,6 @@ func DBMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
                         return echo.NewHTTPError(500, "Something went wrong. Please try again later.")
                 }
 
-                err = dbi.CreateIndex(db)
-                if err != nil {
-                        c.Logger().Error("Error creating index.")
-                        return echo.NewHTTPError(500, "Something went wrong. Please try again later.")
-                }
-
                 return next(c)
         }
 }

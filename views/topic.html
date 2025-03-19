@@ -70,16 +70,20 @@
 
 {{ block "message-display" . }}
         {{ $userUUID := .User.UUID }}
+
         {{ range .Messages }}
-                {{ .Content }} - {{ .CreatedByUsername }}
-                {{ if eq $userUUID .CreatedByUUID }}
-                        <button
-                                hx-delete="/message"
-                                hx-vals='{"uuid": "{{ .UUID }}"}'
-                                hx-swap="outerHTML"
-                        > Delete </button>
-                {{ end }}
-                <br/>
+                <div id="message{{ .UUID }}">
+                        {{ .Content }} - {{ .CreatedByUsername }}
+                        {{ if eq $userUUID .CreatedByUUID }}
+                                <button
+                                        hx-delete="/message"
+                                        hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
+                                        hx-swap="outerHTML"
+                                        hx-target="#message{{ .UUID }}"
+                                > Delete </button>
+                        {{ end }}
+                        <br/>
+                </div>
         {{ end }}
 {{ end }}
 

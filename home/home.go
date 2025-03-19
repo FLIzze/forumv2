@@ -104,20 +104,20 @@ func PostTopic(c echo.Context) error {
 }
 
 func DeleteTopic(c echo.Context) error {
-        response := structs.HomeResponse{}
-
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
         if !ok {
-                response.Status.Error = "You must be logged in to delete a topic."
-                return c.Render(401, "home", response)
-        } else {
-                response.User = user
+                return c.String(401, "You must be logged in to delete a topic.")
+        }
+
+        createdBy := c.FormValue("createdBy")
+        if createdBy != user.UUID {
+                return c.String(401, "You must own the topic to delete it.")
         }
 
         uuid := c.FormValue("uuid")
-
         _, err := db.Exec(`
+
         DELETE FROM
                 topic
         WHERE 
@@ -125,11 +125,8 @@ func DeleteTopic(c echo.Context) error {
         `, uuid)
         if err != nil {
                 c.Logger().Error("Error deleting from topic", err)
-                response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "home", response)
+                return c.String(500, "Topic not found.")
         }
 
-        response.Status.Success = "Topic succesfully deleted."
-
-        return c.Render(200, "home", response)
+        return c.NoContent(200)
 }

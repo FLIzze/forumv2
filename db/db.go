@@ -140,7 +140,7 @@ func CreateView(db *sql.DB) error {
                 COALESCE(COUNT(DISTINCT m.UUID), 0) AS NmbMessagesPosted,
                 COALESCE(COUNT(DISTINCT t.UUID), 0) AS NmbTopicsCreated,
                 (
-                        SELECT MAX(m2.CreationTime) 
+                        SELECT MAX(m2.Content) 
                         FROM message m2 
                         WHERE m2.CreatedBy = u.UUID
                 ) AS LastMessage
@@ -154,12 +154,5 @@ func CreateView(db *sql.DB) error {
                 u.UUID, u.Username, u.CreationTime;
         `)
 
-        return err
-}
-
-func CreateIndex(db *sql.DB) error {
-        _, err := db.Exec(`
-        CREATE INDEX IF NOT EXISTS idx_user_username ON user (Username);
-        `)
         return err
 }

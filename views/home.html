@@ -64,26 +64,29 @@
         {{ $userUUID := .User.UUID }}
 
         {{ range .Topics }}
-                <a href="topic/{{ .UUID }}">
-                        <div>
-                                </br>
-                                Name: {{ .Name }}
-                                </br>
-                                Description: {{ .Description }}
-                                </br>
-                                By: {{ .CreatedByUsername }}
-                                </br>
-                                NmbMessages: {{ .NmbMessages }}
-                        </div>
-                </a>
+        <div id="topic{{ .UUID }}">
+                        <a href="topic/{{ .UUID }}">
+                                <div>
+                                        </br>
+                                        Name: {{ .Name }}
+                                        </br>
+                                        Description: {{ .Description }}
+                                        </br>
+                                        By: {{ .CreatedByUsername }}
+                                        </br>
+                                        NmbMessages: {{ .NmbMessages }}
+                                </div>
+                        </a>
 
-                {{ if eq $userUUID .CreatedByUUID }}
-                        <button 
-                                hx-delete="/topic" 
-                                hx-vals='{"uuid": "{{ .UUID }}"}'
-                                hx-swap="outerHTML"
-                        > Delete</button>
-                {{ end }}
+                        {{ if eq $userUUID .CreatedByUUID }}
+                                <button 
+                                        hx-delete="/topic" 
+                                        hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
+                                        hx-swap="outerHTML"
+                                        hx-target="#topic{{ .UUID }}"
+                                > Delete</button>
+                        {{ end }}
+                </div>
         {{ end }}
 {{ end }}
 
