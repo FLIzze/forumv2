@@ -14,11 +14,6 @@
         <body>
                 <a href="/">home</a>
                 {{ template "login-form" . }}
-
-                <div class="login-status">
-                        {{ template "login-status" . }}
-                </div>
-
                 {{ template "goto-register" . }}
 
                 <script>
@@ -35,20 +30,15 @@
 </html>
 {{ end }}
 
-{{ block "login-status" . }}
-        {{ template "status" . }}
-{{ end }}
-
 {{ block "login-form" . }}
         <form
                 hx-post="/login"
                 hx-swap="outerHTML"
-                hx-target=".login-status"
-                hx-push-url="/"
         >
                 <input type="text" placeholder="username" name="username"/>
                 <input type="password" placeholder="password" name="password"/>
                 <button type="submit">login</button>
+                {{ template "status" . }}
         </form>
 {{ end }}
 

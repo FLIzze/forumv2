@@ -24,31 +24,22 @@
         <body>
                 <a href="/">home</a>
                 {{ template "register-form" . }}
-
-                <div class="register-status">
-                        {{ template "register-status" . }}
-                </div>
-
                 {{ template "goto-login" . }}
         </body>
 </html>
-{{ end }}
-
-{{ block "register-status" . }}
-        {{ template "status" . }}
 {{ end }}
 
 {{ block "register-form" . }}
         <form
                 hx-post="/register"
                 hx-swap="outerHTML"
-                hx-target=".register-status"
         >
                 <input type="text" placeholder="account name" name="username"/>
                 <input type="email" placeholder="email" name="email"/>
                 <input type="password" placeholder="password" name="password"/>
                 <input type="password" placeholder="repeat password" name="password-confirm"/>
                 <button type="submit">create account</button>
+                {{ template "status" . }}
         </form>
 {{ end }}
 

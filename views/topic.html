@@ -15,9 +15,6 @@
         <body>
                 {{ template "navbar" . }}
                 {{ template "topic-form" . }}
-                <div class="topic-status">
-                        {{ template "topic-status" . }}
-                </div>
                 {{ template "topic-subject" . }}
                 {{ template "topic-message" . }}
                 <script>
@@ -34,17 +31,11 @@
 </html>
 {{ end }}
 
-{{ block "topic-status" . }}
-        {{ template "status" .Status }}
-{{ end }}
-
 {{ block "topic-form" . }}
         <form 
                 hx-post="/message"
                 hx-vals='{"uuid": "{{ .Subject.UUID }}"}'
                 id="topic-form"
-                hx-on::after-request="this.reset()"
-                hx-target=".topic-status"
         >
                 {{ if .User.UUID }}
                         <input type="text" name="message" placeholder="message"/>
@@ -53,7 +44,7 @@
                         <p>Login to post a message</p>
                 {{ end }}
 
-                </br>
+                {{ template "status" .Status }}
         </form>
 {{ end }}
 

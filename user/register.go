@@ -24,7 +24,7 @@ func PostRegister(c echo.Context) error {
 
         if (username == "" || email == "" || password == "" || passwordConfirmation == "") {
                 response.Error = "You must fill the whole form"
-                return c.Render(422, "register-status", response)
+                return c.Render(422, "register-form", response)
         }
 
         db := c.Get("db").(*sql.DB)
@@ -38,7 +38,7 @@ func PostRegister(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error retrieving username", err)
                 response.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "register-status", response)
+                return c.Render(500, "register-form", response)
         }
         defer rows.Close()
 
@@ -50,33 +50,33 @@ func PostRegister(c echo.Context) error {
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
                         response.Error = "Something went wrong. Please try again later."
-                        return c.Render(422, "register-status", response)
+                        return c.Render(422, "register-form", response)
                 }
 
                 if username == existingUsername {
                         response.Error = "Username already taken"
-                        return c.Render(422, "register-status", response)
+                        return c.Render(422, "register-form", response)
                 } else if email == existingEmail {
                         response.Error = "Email already taken"
-                        return c.Render(422, "register-status", response)
+                        return c.Render(422, "register-form", response)
                 }
         }
 
         if (password != passwordConfirmation) {
                 response.Error = "Both password must match"
-                return c.Render(422, "register-status", response)
+                return c.Render(422, "register-form", response)
         }
 
         if (len(password) > 17 || len(password) < 3) {
                 response.Error = "Password must be < 3 and > 17"
-                return c.Render(422, "register-status", response)
+                return c.Render(422, "register-form", response)
         }
 
         hashedPassword, err := utils.GenerateHash(password)
         if err != nil {
                 c.Logger().Error("Error hashing password: %s", err)
                 response.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "register-status", response)
+                return c.Render(500, "register-form", response)
         }
 
         if (len(username) < 3 || len(username) > 17) {
@@ -103,14 +103,14 @@ func PostRegister(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error inserting session: %s", err)
                 response.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "register-status", response)
+                return c.Render(500, "register-form", response)
         }
 
         err = Login(db, userUUID, sessionUUID, c)
         if err != nil {
                 c.Logger().Error("Error updating session", err)
                 response.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "register-status", response)
+                return c.Render(500, "register-form", response)
         }
 
         c.Response().Header().Set("HX-Redirect", "/")

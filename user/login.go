@@ -21,7 +21,7 @@ func PostLogin(c echo.Context) error {
 
         if (inputUsername == "" || inputPassword == "") {
                 response.Error = "You must fill the whole form"
-                return c.Render(422, "login-status", response)
+                return c.Render(422, "login-form", response)
         }
 
         db := c.Get("db").(*sql.DB)
@@ -40,14 +40,14 @@ func PostLogin(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Incorrect username", err)
                 response.Error = "Incorrect password or username"
-                return c.Render(422, "login-status", response)
+                return c.Render(422, "login-form", response)
         }
 
         err = utils.CompareHashPassword(password, inputPassword)
         if err != nil {
                 c.Logger().Error("Incorrect password", err)
                 response.Error = "Incorrect password or username"
-                return c.Render(422, "login-status", response)
+                return c.Render(422, "login-form", response)
         }
 
         sessionUUID := utils.Uuid()
@@ -56,7 +56,7 @@ func PostLogin(c echo.Context) error {
         if err != nil {
                 c.Logger().Error("Error updating session", err)
                 response.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "login-status", response)
+                return c.Render(500, "login-form", response)
         }
 
         c.Response().Header().Set("HX-Redirect", "/")

@@ -15,11 +15,6 @@
         <body>
                 {{ template "navbar" . }}
                 {{ template "home-form" . }}
-
-                <div class="home-status">
-                        {{ template "home-status" . }}
-                </div>
-
                 {{ template "home-table" . }}
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
@@ -45,17 +40,10 @@
         </table>
 {{ end }}
 
-{{ block "home-status" . }}
-        {{ template "status" .Status }}
-{{ end }}
-
 {{ block "home-form" . }}
         <form 
                 hx-post="/topic" 
-                hx-on::after-request="this.reset()"
                 id="topics-form"
-                class="mb-4"
-                hx-target=".home-status"
         >
                 {{ if .User.UUID }}
                         <input type="text" name="name" placeholder="name"/>
@@ -65,6 +53,8 @@
                 {{ else }}
                         <p>Login to post a topic</p>
                 {{ end }}
+
+                {{ template "status" .Status }}
         </form>
 {{ end }}
 
