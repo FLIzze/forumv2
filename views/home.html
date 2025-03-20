@@ -10,6 +10,7 @@
                         crossorigin="anonymous">
                 </script>
                 <link rel="stylesheet" href="/css/home.css">
+                <link rel="stylesheet" href="/css/main.css">
         </head>
         <body>
                 {{ template "navbar" . }}
@@ -84,7 +85,7 @@
                         <td><a href="/topic/{{ .UUID }}">{{ .Name }}</a></td>
                         <td><a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a></td>
                         <td>{{ .NmbMessages }}</td>
-                        <td>{{ .LastMessage }}</td>
+                        <td>{{ .FormattedLastMessage }}</td>
 
                         {{ if eq $userUUID .CreatedByUUID }}
                                 <td><button 

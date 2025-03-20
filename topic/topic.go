@@ -64,6 +64,7 @@ func GetTopic(c echo.Context) error {
                         return c.Render(500, "topic", response)
                 }
 
+                message.FormattedCreationTime = utils.FormatDate(message.CreationTime)
                 response.Messages = append(response.Messages, message)
         }
 

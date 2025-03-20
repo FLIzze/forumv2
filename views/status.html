@@ -1,9 +1,9 @@
 {{ block "status" .Status }}
         {{ if .Error }}
-                {{ .Error }}
+                <p class="error">{{ .Error }}</p>
         {{ end }}
 
         {{ if .Success }}
-                {{ .Success }}
+                <p class="success">{{ .Success }}</p>
         {{ end }}
 {{ end }}

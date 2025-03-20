@@ -52,19 +52,27 @@ func PostLogin(c echo.Context) error {
 
         sessionUUID := utils.Uuid()
 
-        _, err = db.Exec(`
-        UPDATE session
-        SET Connected = 1, SessionUUID = ?
-        WHERE UserUUID = ?
-        `, sessionUUID, uuid)
+        err = Login(db, uuid, sessionUUID, c)
         if err != nil {
                 c.Logger().Error("Error updating session", err)
                 response.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "login-status", response)
         }
 
-        cookie.PostCookie(c, sessionUUID)
-
         c.Response().Header().Set("HX-Redirect", "/")
 	return c.NoContent(200)
+}
+
+func Login(db *sql.DB, uuid, sessionUUID string, c echo.Context) error {
+        _, err := db.Exec(`
+        UPDATE session
+        SET Connected = 1, SessionUUID = ?
+        WHERE UserUUID = ?
+        `, sessionUUID, uuid)
+        if err != nil {
+                return err
+        }
+
+        cookie.PostCookie(c, sessionUUID)
+        return nil
 }

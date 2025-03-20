@@ -1,12 +1,8 @@
-* {
-        margin: 0;
-        padding: 0;
-}
-
 .topic-subject {
         margin-top: 35px;
         margin-bottom: 35px;
-        font-weight: bold;
+        display: flex;
+        flex-direction: column;
 }
 
 .message {
@@ -17,4 +13,8 @@
         margin-left: 5px;
         width: fit-content;
         padding: 6px;
+}
+
+.title {
+        font-weight: bold;
 }

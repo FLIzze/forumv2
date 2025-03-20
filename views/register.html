@@ -9,6 +9,7 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link rel="stylesheet" href="/css/main.css">
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
                                 document.body.addEventListener("htmx:beforeSwap", function(evt) {
@@ -23,15 +24,25 @@
         <body>
                 <a href="/">home</a>
                 {{ template "register-form" . }}
+
+                <div class="register-status">
+                        {{ template "register-status" . }}
+                </div>
+
                 {{ template "goto-login" . }}
         </body>
 </html>
+{{ end }}
+
+{{ block "register-status" . }}
+        {{ template "status" . }}
 {{ end }}
 
 {{ block "register-form" . }}
         <form
                 hx-post="/register"
                 hx-swap="outerHTML"
+                hx-target=".register-status"
         >
                 <input type="text" placeholder="account name" name="username"/>
                 <input type="email" placeholder="email" name="email"/>

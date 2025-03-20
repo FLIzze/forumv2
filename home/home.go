@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
         structs "forum/structs"
+        utils "forum/utils"
 )
 
 func GetHomePage(c echo.Context) error {
@@ -42,6 +43,7 @@ func GetHomePage(c echo.Context) error {
                         return c.Render(422, "home", response)
                 }
 
+                topic.FormattedLastMessage = utils.FormatDate(topic.LastMessage)
                 response.Topics = append(response.Topics, topic)
         }
 

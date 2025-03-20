@@ -30,6 +30,7 @@ type Topic struct {
         CreatedByUUID string
         NmbMessages int
         LastMessage *time.Time
+        FormattedLastMessage string
 }
 
 type TopicResponse struct {
@@ -52,7 +53,8 @@ type Message struct {
         Content template.HTML
         CreatedByUsername string
         CreatedByUUID string
-        CreationTime time.Time
+        CreationTime *time.Time
+        FormattedCreationTime string
 }
 
 type ProfilResponse struct {
