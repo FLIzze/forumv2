@@ -56,14 +56,8 @@ func PostTopic(c echo.Context) error {
 
         topic.UUID = uuid.New().String()
         topic.Name = c.FormValue("name")
-        topic.Description = c.FormValue("description")
+        topic.Description = c.FormValue("message")
 
-        if topic.Name == "" || topic.Description == "" {
-                response.Status.Error = "Name and description must be filled."
-                return c.Render(422, "home-form", response)
-        }
-
-        db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
         if !ok {
                 response.Status.Error = "You must be logged in to post a topic."
@@ -71,6 +65,13 @@ func PostTopic(c echo.Context) error {
         } else {
                 response.User = user
         }
+
+        if topic.Name == "" || topic.Description == "" {
+                response.Status.Error = "Name and description must be filled."
+                return c.Render(422, "home-form", response)
+        }
+
+        db := c.Get("db").(*sql.DB)
 
         _, err := db.Exec(`
         INSERT INTO topic (UUID, Name, Description, CreatedBy, CreationTime) 
@@ -120,14 +121,14 @@ func DeleteTopic(c echo.Context) error {
                 return c.Render(401, "home-form", response)
         }
 
-        uuid := c.FormValue("uuid")
+        topicUUID := c.FormValue("uuid")
         _, err := db.Exec(`
 
         DELETE FROM
                 topic
         WHERE 
                 uuid = ?
-        `, uuid)
+        `, topicUUID)
         if err != nil {
                 c.Logger().Error("Error deleting from topic", err)
                 response.Status.Error = "Something went wrong. Please try again later."

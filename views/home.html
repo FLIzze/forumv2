@@ -14,8 +14,8 @@
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "home-form" . }}
                 {{ template "home-table" . }}
+                {{ template "home-form" . }}
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
                                 document.body.addEventListener("htmx:beforeSwap", function(evt) {
@@ -47,9 +47,8 @@
         >
                 {{ if .User.UUID }}
                         <input type="text" name="name" placeholder="name"/>
-                        <input type="text" name="description" placeholder="description"/>
+                        {{ template "inputForm" . }}
                         <button type="submit">add</button>
-                        <br>
                 {{ else }}
                         <p>Login to post a topic</p>
                 {{ end }}

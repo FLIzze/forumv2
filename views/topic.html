@@ -11,35 +11,12 @@
                 </script>
                 <link rel="stylesheet" href="/css/topic.css">
                 <link rel="stylesheet" href="/css/main.css">
-                <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
         </head>
         <body>
                 {{ template "navbar" . }}
                 {{ template "topic-subject" .Subject }}
                 {{ template "topic-message" . }}
                 {{ template "topic-form" . }}
-
-                <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-                <script>
-                        const quill = new Quill('#editor', {
-                                modules: {
-                                        toolbar: [
-                                                [{ header: [1, 2, false] }],
-                                                ["bold", "italic", "underline"],
-                                                ["blockquote", "code-block"],
-                                                ["link"],
-                                                ["image"],
-                                        ],
-                                },
-                                placeholder: "Send a message",
-                                theme: "snow"
-                        });
-
-                        document.getElementById("topic-form").addEventListener("submit", function(event) {
-                                let quillContent = quill.root.innerHTML;
-                                document.getElementById("quill-content").value = quillContent;
-                        });
-                </script>
 
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
@@ -57,19 +34,17 @@
 
 {{ block "topic-form" . }}
         <form 
+                id="topic-form"
                 hx-post="/message"
                 hx-vals='{"uuid": "{{ .Subject.UUID }}"}'
-                id="topic-form"
+                hx-swap="outerHTML"
         >
                 {{ if .User.UUID }}
-                        <div id="editor"></div>
-                        <input type="hidden" name="message" id="quill-content">
+                        {{ template "inputForm" . }}
                         <button type="submit">add</button>
                 {{ else }}
                         <p>Login to post a message</p>
                 {{ end }}
-
-                {{ template "status" .Status }}
         </form>
 {{ end }}
 

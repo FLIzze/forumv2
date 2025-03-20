@@ -4,20 +4,20 @@ import (
 	"html/template"
 	"io"
 	"log"
-        "os"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-        // "github.com/microcosm-cc/bluemonday"
+	// "github.com/microcosm-cc/bluemonday"
 
+	dbi "forum/db"
 	er404 "forum/er404"
 	home "forum/home"
 	mw "forum/middleware"
 	topic "forum/topic"
 	user "forum/user"
-        dbi "forum/db"
 )
 
 type Templates struct {

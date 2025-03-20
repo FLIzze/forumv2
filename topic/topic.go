@@ -81,6 +81,14 @@ func PostMessage(c echo.Context) error {
         message.TopicUUID = c.FormValue("uuid")
         message.Content = c.FormValue("message")
 
+        user, ok := c.Get("user").(structs.User)
+        if !ok {
+                response.Status.Error = "You must be logged in to post a message."
+                return c.Render(401, "topic-form", response)
+        } else {
+                response.User = user
+        }
+
         if message.Content == "" {
                 c.Logger().Error("Message empty")
                 response.Status.Error = "Message must be filled"
@@ -88,10 +96,6 @@ func PostMessage(c echo.Context) error {
         }
 
         db := c.Get("db").(*sql.DB)
-        user, ok := c.Get("user").(structs.User)
-        if ok {
-                response.User = user
-        }
 
         _, err := db.Exec(`
         INSERT INTO message (UUID, TopicUUID, Content, CreatedBy, CreationTime) 
