@@ -24,7 +24,7 @@ func GetProfil(c echo.Context) error {
 
         row := db.QueryRow(`
         SELECT 
-                Username, CreationTime, NmbMessagesPosted, NmbTopicsCreated, LastMessage
+                Username, CreationTime, NmbMessagesPosted, NmbTopicsCreated, LastMessage, LastTopic
         FROM 
                 userInfo
         WHERE
@@ -32,7 +32,7 @@ func GetProfil(c echo.Context) error {
         `, username)
 
         err := row.Scan(&userProfil.Username, &userProfil.CreationTime, &userProfil.NmbMessagesPosted, 
-                                                &userProfil.NmbTopicsCreated, &userProfil.LastMessage)
+                        &userProfil.NmbTopicsCreated, &userProfil.LastMessage, &userProfil.LastTopic)
         if err != nil {
                 c.Logger().Error("Error retrieving user from userInfo (does not exist)", err)
                 return c.Render(404, "404", nil)

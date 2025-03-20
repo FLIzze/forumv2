@@ -8,7 +8,7 @@ import (
 
 func FormatDate(date *time.Time) string {
         if date == nil {
-                return "No message yet"
+                return "no message yet"
         }
 
         duration := time.Since(*date) 

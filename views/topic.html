@@ -11,12 +11,36 @@
                 </script>
                 <link rel="stylesheet" href="/css/topic.css">
                 <link rel="stylesheet" href="/css/main.css">
+                <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "topic-form" . }}
-                {{ template "topic-subject" . }}
+                {{ template "topic-subject" .Subject }}
                 {{ template "topic-message" . }}
+                {{ template "topic-form" . }}
+
+                <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+                <script>
+                        const quill = new Quill('#editor', {
+                                modules: {
+                                        toolbar: [
+                                                [{ header: [1, 2, false] }],
+                                                ["bold", "italic", "underline"],
+                                                ["blockquote", "code-block"],
+                                                ["link"],
+                                                ["image"],
+                                        ],
+                                },
+                                placeholder: "Send a message",
+                                theme: "snow"
+                        });
+
+                        document.getElementById("topic-form").addEventListener("submit", function(event) {
+                                let quillContent = quill.root.innerHTML;
+                                document.getElementById("quill-content").value = quillContent;
+                        });
+                </script>
+
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
                                 document.body.addEventListener("htmx:beforeSwap", function(evt) {
@@ -38,7 +62,8 @@
                 id="topic-form"
         >
                 {{ if .User.UUID }}
-                        <input type="text" name="message" placeholder="message"/>
+                        <div id="editor"></div>
+                        <input type="hidden" name="message" id="quill-content">
                         <button type="submit">add</button>
                 {{ else }}
                         <p>Login to post a message</p>
@@ -48,10 +73,11 @@
         </form>
 {{ end }}
 
-{{ block "topic-subject" . }}
-        <div class="topic-subject">
-                <p class="title">{{ .Subject.Name }}</p>
-                <p>{{ .Subject.Description }}</p>
+{{ block "topic-subject" .Subject }}
+        <div class="message">
+                <a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a>- {{ .FormattedLastMessage }}
+                <p class="title">{{ .Name }}</p>
+                {{ .Description }}
         </div>
 {{ end }}
 
@@ -67,7 +93,7 @@
         {{ range .Messages }}
                 <div id="message{{ .UUID }}" class="message">
                         <a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a> - {{ .FormattedCreationTime }}
-                        {{ .Content }}
+                        <div class="content">{{ .Content | safeHTML }}</div>
                         {{ if eq $userUUID .CreatedByUUID }}
                                 <button
                                         hx-delete="/message"

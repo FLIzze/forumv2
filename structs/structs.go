@@ -13,6 +13,7 @@ type User struct {
         NmbMessagesPosted int
         NmbTopicsCreated int
         LastMessage *string
+        LastTopic *string
         CreationTime time.Time
 }
 
@@ -43,14 +44,16 @@ type TopicResponse struct {
 type Subject struct {
         UUID string
         Name string
-        Description string
+        Description template.HTML
         CreatedByUsername string
+        LastMessage *time.Time
+        FormattedLastMessage string
 }
 
 type Message struct {
         UUID string
         TopicUUID string
-        Content template.HTML
+        Content string
         CreatedByUsername string
         CreatedByUUID string
         CreationTime *time.Time

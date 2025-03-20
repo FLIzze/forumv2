@@ -19,16 +19,7 @@
                         hx-swap="outerHTML"
                 >logout</button>
 
-                </br>
-                {{ .User.Username }}
-                </br>
-                {{ .User.CreationTime }}
-                </br>
-                {{ .User.NmbMessagesPosted }}
-                </br>
-                {{ .User.NmbTopicsCreated }}
-                </br>
-                {{ .User.LastMessage }}
+                {{ template "userInfo" .User }}
         </body>
 </html>
 {{ end }}

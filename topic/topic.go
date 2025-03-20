@@ -12,6 +12,7 @@ import (
 
 func GetTopic(c echo.Context) error {
         response := structs.TopicResponse{}
+        subject := structs.Subject{}
 
         UUID := c.Param("uuid")
         user, ok := c.Get("user").(structs.User)
@@ -23,20 +24,21 @@ func GetTopic(c echo.Context) error {
 
         row := db.QueryRow(`
         SELECT 
-                UUID, Name, Description, CreatedByUsername
+                UUID, Name, Description, CreatedByUsername, LastMessage
         FROM 
                 topicInfo
         WHERE 
                 UUID = ?
         `, UUID)
 
-        err := row.Scan(&response.Subject.UUID, &response.Subject.Name, &response.Subject.Description, 
-                                                                        &response.Subject.CreatedByUsername)
+        err := row.Scan(&subject.UUID, &subject.Name, &subject.Description, &subject.CreatedByUsername, &subject.LastMessage)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
                 response.Status.Error = "Could not retrieve topic."
                 return c.Render(500, "topic", response)
         }
+        subject.FormattedLastMessage = utils.FormatDate(subject.LastMessage)
+        response.Subject = subject
 
         rows, err := db.Query(`
         SELECT 
@@ -77,7 +79,7 @@ func PostMessage(c echo.Context) error {
 
         message.UUID = utils.Uuid()
         message.TopicUUID = c.FormValue("uuid")
-        message.Content = utils.RenderMarkdown(c.FormValue("message"))
+        message.Content = c.FormValue("message")
 
         if message.Content == "" {
                 c.Logger().Error("Message empty")

@@ -43,8 +43,9 @@ func CreateTable(db *sql.DB) error {
         CREATE TABLE IF NOT EXISTS topic (
                 UUID varchar(37) NOT NULL PRIMARY KEY, 
                 Name varchar(95) NOT NULL, 
-                Description text NOT NULL,
+                Description LONGTEXT NOT NULL,
                 CreatedBy varchar(37) NULL,
+                Pinned int DEFAULT 0,
                 FOREIGN KEY (CreatedBy) REFERENCES user(UUID) ON DELETE SET NULL,
                 CreationTime DATETIME NOT NULL
         )
@@ -56,10 +57,11 @@ func CreateTable(db *sql.DB) error {
         _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS message (
                 UUID varchar(37) NOT NULL PRIMARY KEY,
-                Content text NOT NULL,
+                Content LONGTEXT NOT NULL,
                 CreationTime DATETIME NOT NULL,
                 TopicUUID varchar(37) NULL,
                 CreatedBy varchar(37) NULL,
+                Pinned int DEFAULT 0,
                 FOREIGN KEY (TopicUUID) REFERENCES topic(UUID) ON DELETE CASCADE,
                 FOREIGN KEY (CreatedBy) REFERENCES user(UUID) ON DELETE SET NULL
         )
@@ -104,18 +106,20 @@ func CreateView(db *sql.DB) error {
                 t.Name,
                 t.Description,
                 t.CreatedBy AS CreatedByUUID,
+                t.Pinned,
                 u.Username AS CreatedByUsername,
                 COUNT(m.UUID) AS NmbMessages,
-                (SELECT 
-                        m2.CreationTime
-                        FROM 
-                                message m2 
-                        WHERE 
-                                m2.TopicUUID = t.UUID 
-                        ORDER BY 
-                                m2.CreationTime DESC 
-                        LIMIT 
-                                1
+                COALESCE(
+                        (SELECT 
+                                m2.CreationTime
+                                FROM 
+                                        message m2 
+                                WHERE 
+                                        m2.TopicUUID = t.UUID 
+                                ORDER BY 
+                                        m2.CreationTime DESC 
+                        LIMIT 1),
+                        t.CreationTime
                 ) AS LastMessage
         FROM 
                 topic t 
@@ -124,7 +128,9 @@ func CreateView(db *sql.DB) error {
         LEFT JOIN 
                 message m ON t.UUID = m.TopicUUID 
         GROUP BY 
-                t.UUID, t.Name, t.Description, u.Username;
+                t.UUID, t.Name, t.Description, u.Username
+        ORDER BY 
+                LastMessage DESC
         `)
         if err != nil {
                 return err 
@@ -137,12 +143,15 @@ func CreateView(db *sql.DB) error {
                 m.TopicUUID,
                 m.Content, 
                 m.CreationTime,
+                m.Pinned,
                 u.Username as CreatedByUsername,
                 u.UUID as CreatedByUUID
         FROM 
                 message m 
         JOIN 
-                user u ON m.CreatedBy = u.UUID;
+                user u ON m.CreatedBy = u.UUID
+        ORDER BY
+               CreationTime ASC 
         `)
         if err != nil {
                 return err 
@@ -160,7 +169,12 @@ func CreateView(db *sql.DB) error {
                         SELECT MAX(m2.Content) 
                         FROM message m2 
                         WHERE m2.CreatedBy = u.UUID
-                ) AS LastMessage
+                ) AS LastMessage,
+                (
+                        SELECT MAX(t2.Name) 
+                        FROM topic t2 
+                        WHERE t2.CreatedBy = u.UUID
+                ) AS LastTopic
         FROM 
                 user u
         LEFT JOIN 

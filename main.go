@@ -6,11 +6,11 @@ import (
 	"log"
         "os"
 
-	"github.com/Masterminds/sprig/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+        // "github.com/microcosm-cc/bluemonday"
 
 	er404 "forum/er404"
 	home "forum/home"
@@ -29,11 +29,18 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 }
 
 func newTemplate() *Templates {
-        funcMap := sprig.FuncMap()
+        // p := bluemonday.UGCPolicy()
 
-	return &Templates{
-		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("views/*.html")),
-	}
+        safeHTML := template.FuncMap{
+                "safeHTML": func(s string) template.HTML {
+                        // sanitized := p.Sanitize(s) 
+                        return template.HTML(s) 
+                },
+        }
+
+        return &Templates{
+                templates: template.Must(template.New("").Funcs(safeHTML).ParseGlob("views/*.html")),
+        }
 }
 
 func main() {

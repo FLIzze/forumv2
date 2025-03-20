@@ -1,15 +1,8 @@
-.topic-subject {
-        margin-top: 35px;
-        margin-bottom: 35px;
-        display: flex;
-        flex-direction: column;
-}
-
 .message {
         border: black;
         border-style: solid;
         border-width: 1px;
-        margin-bottom: 20px;
+        margin-top: 20px;
         margin-left: 5px;
         width: fit-content;
         padding: 6px;
@@ -17,4 +10,12 @@
 
 .title {
         font-weight: bold;
+}
+
+#topic-form {
+        margin-top: 40px;
+}
+
+#editor {
+        height: 150px;
 }

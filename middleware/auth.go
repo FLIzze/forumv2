@@ -41,7 +41,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
                 row = db.QueryRow(`
                 SELECT
-                        Username, CreationTime, NmbMessagesPosted, NmbTopicsCreated, LastMessage
+                        Username, CreationTime, NmbMessagesPosted, NmbTopicsCreated, LastMessage, LastTopic
                 FROM
                         userInfo
                 WHERE 
@@ -49,7 +49,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
                 `, currentUser.UUID)
 
                 err = row.Scan(&currentUser.Username, &currentUser.CreationTime, &currentUser.NmbMessagesPosted, 
-                                                        &currentUser.NmbTopicsCreated, &currentUser.LastMessage)
+                                &currentUser.NmbTopicsCreated, &currentUser.LastMessage, &currentUser.LastTopic)
                 if err != nil {
                         c.Logger().Error("Error retrieving userInfo.", err)
                         return echo.NewHTTPError(500, "Something went wrong. Please try again later.")
@@ -62,7 +62,8 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
                 }
 
                 if (c.Request().Method == echo.POST || c.Request().Method == echo.DELETE) && c.Get("user") == nil {
-                        return c.HTML(401, `You must be logged in to perform this action. <a href="/">home</a> <a href="/login">login</a>`)
+                        return c.HTML(401, 
+                        `You must be logged in to perform this action. <a href="/">home</a> <a href="/login">login</a>`)
                 }
 
                 return next(c)
