@@ -4,24 +4,17 @@
 }
 
 .navbar-container {
+        top: 0px;
+        gap: 20px;
         display: flex;
-        justify-content: space-between;
-        width: 1000px;
-        margin-top: 30px;
-        margin-left: 20%;
+        padding-left: 20%;
+        height: 40px;
+        align-items: center;
+        background-color: black;
+        position: sticky;
 }
 
 .navbar-link {
-        border: none;
-        text-decoration: none;
-        background-color: black;
         color: white;
-        padding: 4px 13px;
-        top: 0px;
-        position: relative;
-        transition: ease-in-out 0.3s;
-}
-
-.navbar-link:hover {
-        top: -3px;
+        text-decoration: none;
 }

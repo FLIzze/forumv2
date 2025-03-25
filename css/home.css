@@ -7,26 +7,27 @@
         display: flex;
         gap: 5px;
         flex-direction: column;
-        width: 600px;
         padding: 3px;
+        margin-top: 30px;
 }
 
 .message-input {
         font-size: large;
-        width: 600px;
+        width: 1000px;
         height: 600px;
         resize: none;
         padding: 3px;
 }
 
 .name-input {
+        width: 1000px;
         font-size: medium;
         padding: 3px;
 }
 
 .home-container {
         margin-left: 20%;
-        padding-top: 60px;
+        padding: 60px 0;
 }
 
 .name-header {
@@ -34,14 +35,18 @@
 }
 
 table {
-        width: 1000px;
+        width: 70%;
         border-spacing: 0;
         border-collapse: separate; 
 }
 
 td, th {
-        padding: 13px 5px;
+        padding: 13px 10px;
         border-bottom: 1px solid black;
+}
+
+tr:nth-child(even) {
+        background-color: #f2f2f2;
 }
 
 tr {
@@ -69,11 +74,8 @@ th {
         color: white;
         padding: 3px 5px;
         cursor: pointer;
-}
-
-.button-submit:hover {
-        background-color: white;
-        color: black;
+        height: 35px;
+        width: 1000px;
 }
 
 .delete {
@@ -83,5 +85,5 @@ th {
 }
 
 .name {
-        width: 100%;
+        width: 60%;
 }

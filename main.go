@@ -72,6 +72,8 @@ func main() {
         e.GET("/register", user.GetRegister)
         e.GET("/me", user.GetMeProfil)
         e.GET("/user/:username", user.GetProfil)
+        e.GET("/postTopic", post.Topic)
+        e.GET("/postMessage", post.Topic)
         e.GET("/*", er404.Get404)
 
         e.POST("/login", user.PostLogin)

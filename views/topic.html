@@ -18,7 +18,6 @@
                 <div class="home-container">
                         {{ template "topic-subject" . }}
                         {{ template "topic-message" . }}
-                        <!-- {{ template "topic-form" . }} -->
                 </div>
 
                 <script>
@@ -48,7 +47,7 @@
         >
                 {{ if .User.UUID }}
                         <textarea class="message-input" name="message" placeholder="Send a message"></textarea>
-                        <button type="submit" class="topic-submit">Post message</button>
+                        <button type="submit" class="button-submit">Post message</button>
                 {{ else }}
                         <p>Login to post a message</p>
                 {{ end }}

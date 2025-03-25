@@ -221,7 +221,7 @@ func DeleteTopic(c echo.Context) error {
 
         DELETE FROM
                 topic
-        WHERE 
+        WHERE
                 uuid = ?
         `, topicUUID)
         if err != nil {
@@ -231,5 +231,6 @@ func DeleteTopic(c echo.Context) error {
         }
 
         time.Sleep(1 * time.Second)
+        c.Response().Header().Set("HX-Redirect", "/")
         return c.NoContent(200)
 }

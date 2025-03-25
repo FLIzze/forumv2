@@ -26,6 +26,8 @@ func GetHomePage(c echo.Context) error {
                 UUID, Name, Description, CreatedByUsername, CreatedByUUID, NmbMessages, LastMessage, CreationTime
         FROM 
                 topicInfo
+        LIMIT
+                25
         `)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
@@ -99,7 +101,6 @@ func PostTopic(c echo.Context) error {
         }
 
         response.Topics = append(response.Topics, topic)
-        response.Status.Success = "Topic succesfully created."
 
         c.Render(200, "oob-topic", response)
         return c.Render(200, "home-form", response)
