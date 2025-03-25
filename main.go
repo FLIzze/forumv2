@@ -10,7 +10,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	// "github.com/microcosm-cc/bluemonday"
 
 	dbi "forum/db"
 	er404 "forum/er404"
@@ -52,7 +51,7 @@ func main() {
         e := echo.New()
         e.Use(middleware.Logger())
 
-        e.Static("/css", "css")
+        e.Static("/css", "css")  
 
         e.Renderer = newTemplate()
 
@@ -79,6 +78,7 @@ func main() {
 
         e.POST("/topic", home.PostTopic)
         e.POST("/message", topic.PostMessage)
+        e.POST("/quote", topic.QuoteMessage)
         e.POST("/logout", user.LogOut)
 
         e.DELETE("/message", topic.DeleteMessage)

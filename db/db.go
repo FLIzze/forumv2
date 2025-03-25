@@ -106,6 +106,7 @@ func CreateView(db *sql.DB) error {
                 t.Name,
                 t.Description,
                 t.CreatedBy AS CreatedByUUID,
+                t.CreationTime,
                 t.Pinned,
                 u.Username AS CreatedByUsername,
                 COUNT(m.UUID) AS NmbMessages,

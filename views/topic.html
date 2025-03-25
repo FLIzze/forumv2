@@ -1,5 +1,5 @@
 {{ block "topic" . }}
-<!DOCTYPE html>
+<p>
 <html lang="en">
         <head>
                 <meta charset="UTF-8">
@@ -9,14 +9,18 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
-                <link rel="stylesheet" href="/css/topic.css">
-                <link rel="stylesheet" href="/css/main.css">
+                <link href="/css/home.css" rel="stylesheet">
+                <link href="/css/topic.css" rel="stylesheet">
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "topic-subject" .Subject }}
-                {{ template "topic-message" . }}
-                {{ template "topic-form" . }}
+                {{ template "topic-status" . }}
+
+                <div class="home-container">
+                        {{ template "topic-subject" . }}
+                        {{ template "topic-message" . }}
+                        <!-- {{ template "topic-form" . }} -->
+                </div>
 
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
@@ -32,27 +36,49 @@
 </html>
 {{ end }}
 
+{{ block "topic-status" . }}
+        {{ template "status" .Status }}
+{{ end }}
+
 {{ block "topic-form" . }}
         <form 
-                id="topic-form"
                 hx-post="/message"
-                hx-vals='{"uuid": "{{ .Subject.UUID }}"}'
+                hx-vals='{"uuid": "{{ .Topic.UUID }}"}'
                 hx-swap="outerHTML"
+                class="form"
         >
                 {{ if .User.UUID }}
-                        {{ template "inputForm" . }}
-                        <button type="submit">add</button>
+                        <textarea class="message-input" name="message" placeholder="Send a message"></textarea>
+                        <button type="submit" class="topic-submit">Post message</button>
                 {{ else }}
                         <p>Login to post a message</p>
                 {{ end }}
+
+                {{ template "status" .Status }}
         </form>
 {{ end }}
 
-{{ block "topic-subject" .Subject }}
+{{ block "topic-subject" . }}
         <div class="message">
-                <a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a>- {{ .FormattedLastMessage }}
-                <p class="title">{{ .Name }}</p>
-                {{ .Description }}
+                <p class="title">{{ .Topic.Name }}</p>
+
+                <div class="author">
+                        <div class="by">
+                                <a href="/user/{{ .Topic.CreatedByUsername }}">{{ .Topic.CreatedByUsername }}</a> - 
+                                <p>{{ .Topic.FormattedCreationTime }}</p>
+                        </div>
+
+                        {{ if eq .User.UUID .Topic.CreatedByUUID }}
+                                <button
+                                        hx-delete="/topic"
+                                        hx-vals='{"uuid": "{{ .Topic.UUID }}", "createdBy": "{{ .Topic.CreatedByUUID }}"}'
+                                        hx-swap="outerHTML"
+                                        hx-target=".home-container"
+                                > Delete </button>
+                        {{ end }}
+                </div>
+
+                <p class="description">{{ .Topic.Description | safeHTML }}</p>
         </div>
 {{ end }}
 
@@ -67,23 +93,45 @@
 
         {{ range .Messages }}
                 <div id="message{{ .UUID }}" class="message">
-                        <a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a> - {{ .FormattedCreationTime }}
-                        <div class="content">{{ .Content | safeHTML }}</div>
-                        {{ if eq $userUUID .CreatedByUUID }}
-                                <button
-                                        hx-delete="/message"
-                                        hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
-                                        hx-swap="outerHTML"
-                                        hx-target="#message{{ .UUID }}"
-                                > Delete </button>
-                        {{ end }}
-                        <br/>
+                        <div class="author">
+                                <div class="by">
+                                        <a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a> - 
+                                        <p>{{ .FormattedCreationTime }}</p>
+                                </div>
+
+                                <div>
+                                        <button>Answer</button>
+
+                                        <button 
+                                                hx-post="/quote"
+                                                hx-vals='{"uuid": "{{ .UUID }}"}'
+                                                hx-target=".message-input"
+                                                hx-swap="none"
+                                                hx-on::after-request="
+                                                let response = JSON.parse(event.detail.xhr.responseText);
+                                                document.querySelector('#message-input').value += response.quotedContent + '\n';"
+                                        > Quote </button>
+
+                                        {{ if eq $userUUID .CreatedByUUID }}
+                                                <button
+                                                        hx-delete="/message"
+                                                        hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
+                                                        hx-swap="outerHTML"
+                                                        hx-target="#message{{ .UUID }}"
+                                                > Delete </button>
+                                        {{ end }}
+                                </div>
+                        </div>
+
+                        <p class="content">{{ .Content | safeHTML }}</p>
+
+
                 </div>
         {{ end }}
 {{ end }}
 
 {{ block "oob-message" . }}
-        <div id="message-display" hx-swap-oob="afterbegin">
+        <div id="message-display">
                 {{ template "message-display" . }}
         </div>
 {{ end }}

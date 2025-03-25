@@ -9,13 +9,16 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
-                <link rel="stylesheet" href="/css/home.css">
-                <link rel="stylesheet" href="/css/main.css">
+                <link href="/css/home.css" rel="stylesheet">
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "home-table" . }}
-                {{ template "home-form" . }}
+
+                <div class="home-container">
+                        {{ template "home-table" . }}
+                        <!-- {{ template "home-form" . }} -->
+                </div>
+
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
                                 document.body.addEventListener("htmx:beforeSwap", function(evt) {
@@ -31,7 +34,7 @@
 {{ end }}
 
 {{ block "home-table" . }}
-        <table class="table">
+        <table>
                 {{ template "home-table-header" . }}
 
                 <tbody id="topic-display">
@@ -43,12 +46,13 @@
 {{ block "home-form" . }}
         <form 
                 hx-post="/topic" 
-                id="topics-form"
+                class="form"
+                hx-swap="outerHTML"
         >
                 {{ if .User.UUID }}
-                        <input type="text" name="name" placeholder="name"/>
-                        {{ template "inputForm" . }}
-                        <button type="submit">add</button>
+                        <input type="text" name="name" placeholder="name" class="name-input" maxlength="95"/>
+                        <textarea type="text" name="message" placeholder="description" class="message-input"></textarea>
+                        <button type="submit" class="button-submit">Post topic</button>
                 {{ else }}
                         <p>Login to post a topic</p>
                 {{ end }}
@@ -58,10 +62,10 @@
 {{ end }}
 
 {{ block "home-table-header" . }}
-        <tr class="table-header">
+        <tr>
                 <th>Name</th>
                 <th>Author</th>
-                <th>NmbMessage</th>
+                <th>Messages</th>
                 <th>LastMessage</th>
         </tr>
 {{ end }}
@@ -70,20 +74,11 @@
         {{ $userUUID := .User.UUID }}
 
         {{ range .Topics }}
-                <tr class="table-content" id="topic{{ .UUID }}">
-                        <td><a href="/topic/{{ .UUID }}">{{ .Name }}</a></td>
-                        <td><a href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a></td>
+                <tr id="topic{{ .UUID }}" class="table-content">
+                        <td><a class="link" href="/topic/{{ .UUID }}">{{ .Name }}</a></td>
+                        <td><a class="link" href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a></td>
                         <td>{{ .NmbMessages }}</td>
                         <td>{{ .FormattedLastMessage }}</td>
-
-                        {{ if eq $userUUID .CreatedByUUID }}
-                                <td><button 
-                                        hx-delete="/topic" 
-                                        hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
-                                        hx-swap="outerHTML"
-                                        hx-target="#topic{{ .UUID }}"
-                                > Delete</button></td>
-                        {{ end }}
                 </tr>
         {{ end }}
 {{ end }}

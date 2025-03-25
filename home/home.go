@@ -23,7 +23,7 @@ func GetHomePage(c echo.Context) error {
 
         rows, err := db.Query(`
         SELECT 
-                UUID, Name, Description, CreatedByUsername, CreatedByUUID, NmbMessages, LastMessage
+                UUID, Name, Description, CreatedByUsername, CreatedByUUID, NmbMessages, LastMessage, CreationTime
         FROM 
                 topicInfo
         `)
@@ -36,13 +36,14 @@ func GetHomePage(c echo.Context) error {
 
         for rows.Next() {
                 err := rows.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedByUsername, 
-                                        &topic.CreatedByUUID, &topic.NmbMessages, &topic.LastMessage)
+                        &topic.CreatedByUUID, &topic.NmbMessages, &topic.LastMessage, &topic.CreationTime)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
                         response.Status.Error = "Something went wrong. Please try again later."
                         return c.Render(422, "home", response)
                 }
 
+                topic.FormattedCreationTime = utils.FormatDate(topic.CreationTime)
                 topic.FormattedLastMessage = utils.FormatDate(topic.LastMessage)
                 response.Topics = append(response.Topics, topic)
         }
@@ -57,7 +58,6 @@ func PostTopic(c echo.Context) error {
         topic.UUID = uuid.New().String()
         topic.Name = c.FormValue("name")
         topic.Description = c.FormValue("message")
-
         user, ok := c.Get("user").(structs.User)
         if !ok {
                 response.Status.Error = "You must be logged in to post a topic."

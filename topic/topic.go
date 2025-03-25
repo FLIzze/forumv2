@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+        "github.com/russross/blackfriday/v2"
 
 	structs "forum/structs"
 	utils "forum/utils"
@@ -12,7 +13,7 @@ import (
 
 func GetTopic(c echo.Context) error {
         response := structs.TopicResponse{}
-        subject := structs.Subject{}
+        topic := structs.Topic{}
 
         UUID := c.Param("uuid")
         user, ok := c.Get("user").(structs.User)
@@ -24,21 +25,21 @@ func GetTopic(c echo.Context) error {
 
         row := db.QueryRow(`
         SELECT 
-                UUID, Name, Description, CreatedByUsername, LastMessage
+                UUID, Name, Description, CreatedByUsername, CreatedByUUID, LastMessage, CreationTime
         FROM 
                 topicInfo
         WHERE 
                 UUID = ?
         `, UUID)
 
-        err := row.Scan(&subject.UUID, &subject.Name, &subject.Description, &subject.CreatedByUsername, &subject.LastMessage)
+        err := row.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedByUsername, &topic.CreatedByUUID, 
+                                                                                &topic.LastMessage, &topic.CreationTime)
         if err != nil {
-                c.Logger().Error("Error retrieving topic: ", err)
-                response.Status.Error = "Could not retrieve topic."
-                return c.Render(500, "topic", response)
+                return c.Render(404, "404", nil)
         }
-        subject.FormattedLastMessage = utils.FormatDate(subject.LastMessage)
-        response.Subject = subject
+        topic.FormattedCreationTime = utils.FormatDate(topic.CreationTime)
+        topic.FormattedLastMessage = utils.FormatDate(topic.LastMessage)
+        response.Topic = topic
 
         rows, err := db.Query(`
         SELECT 
@@ -58,7 +59,8 @@ func GetTopic(c echo.Context) error {
 
         for rows.Next() {
                 message := structs.Message{}
-                err := rows.Scan(&message.UUID, &message.Content, &message.CreatedByUsername, &message.CreatedByUUID, 
+                var plainContent string
+                err := rows.Scan(&message.UUID, &plainContent, &message.CreatedByUsername, &message.CreatedByUUID, 
                                                                                                 &message.CreationTime)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
@@ -66,6 +68,8 @@ func GetTopic(c echo.Context) error {
                         return c.Render(500, "topic", response)
                 }
 
+                htmlContent := string(blackfriday.Run([]byte(plainContent)))
+                message.Content = htmlContent
                 message.FormattedCreationTime = utils.FormatDate(message.CreationTime)
                 response.Messages = append(response.Messages, message)
         }
@@ -115,7 +119,7 @@ func PostMessage(c echo.Context) error {
         WHERE
                 uuid = ?
         `, message.UUID)
-        err = row.Scan(&message.CreatedByUsername, &message.CreatedByUUID, &response.Subject.UUID)
+        err = row.Scan(&message.CreatedByUsername, &message.CreatedByUUID, &response.Topic.UUID)
         if err != nil {
                 c.Logger().Error("Error retrieving from messageInfo: ", err)
                 response.Status.Error = "Something went wrong. Please try again later."
@@ -159,5 +163,39 @@ func DeleteMessage(c echo.Context) error {
                 return c.Render(500, "topic-form", response)
         }
 
-        return c.NoContent(200)
+        response.Status.Success = "Deleted topic succesfully."
+        return c.Render(200, "topic-status", response)
+}
+
+func QuoteMessage(c echo.Context) error {
+        response := structs.TopicResponse{}
+
+        db := c.Get("db").(*sql.DB)
+        messageUUID := c.FormValue("uuid")
+        user, ok := c.Get("user").(structs.User)
+        if !ok {
+                response.Status.Error = "You must be logged in to quote a message."
+                return c.Render(401, "topic-form", response)
+        }
+        response.User = user
+
+        var quotedContent string
+        row := db.QueryRow(`
+        SELECT 
+                Content 
+        FROM 
+                message 
+        WHERE 
+                UUID = ?
+        `, messageUUID)
+
+        err := row.Scan(&quotedContent)
+        if err != nil {
+                c.Logger().Error("Error retrieving message content:", err)
+                response.Status.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "topic-form", response)
+        }
+
+        quotedContent = "> " + quotedContent 
+        return c.JSON(200, map[string]string{"quotedContent": quotedContent})
 }

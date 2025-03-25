@@ -1,12 +1,13 @@
 {{ block "navbar" . }}
-        <div class="navbar">
-                <a href="/">home</a>
+        <link href="/css/navbar.css" rel="stylesheet">
+
+        <div class="navbar-container">
+                <a class="navbar-link" href="/">home</a>
 
                 {{ if .User.UUID }}
-                        <a href="/me">profil</a>
-                        <p>Hi {{ .User.Username }}</p>
+                        <a class="navbar-link" href="/me">{{ .User.Username }}</a>
                 {{ else }}
-                        <a href="/login">login</a>
+                        <a class="navbar-link" href="/login">login</a>
                 {{ end }}
         </div>
 {{ end }}

@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"html/template"
 	"time"
 )
 
@@ -14,7 +13,8 @@ type User struct {
         NmbTopicsCreated int
         LastMessage *string
         LastTopic *string
-        CreationTime time.Time
+        CreationTime *time.Time
+        FormattedCreationTime string
 }
 
 type HomeResponse struct {
@@ -32,22 +32,16 @@ type Topic struct {
         NmbMessages int
         LastMessage *time.Time
         FormattedLastMessage string
+        CreationTime *time.Time
+        FormattedCreationTime string
 }
 
 type TopicResponse struct {
         Status Status
-        Subject Subject
+        Topic Topic
         Messages []Message
         User User
-}
-
-type Subject struct {
-        UUID string
-        Name string
-        Description template.HTML
-        CreatedByUsername string
-        LastMessage *time.Time
-        FormattedLastMessage string
+        QuotedMessage string
 }
 
 type Message struct {

@@ -6,6 +6,7 @@ import (
         "github.com/labstack/echo/v4"
 
         structs "forum/structs"
+        utils "forum/utils"
 )
 
 func GetProfil(c echo.Context) error {
@@ -38,6 +39,7 @@ func GetProfil(c echo.Context) error {
                 return c.Render(404, "404", nil)
         }
 
+        userProfil.FormattedCreationTime = utils.FormatDate(userProfil.CreationTime)
         response.UserProfil = userProfil
         return c.Render(200, "profil", response)
 }
