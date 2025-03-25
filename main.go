@@ -52,6 +52,7 @@ func main() {
         e.Use(middleware.Logger())
 
         e.Static("/css", "css")  
+        e.Static("/src", "src")
 
         e.Renderer = newTemplate()
 
@@ -82,7 +83,7 @@ func main() {
         e.POST("/logout", user.LogOut)
 
         e.DELETE("/message", topic.DeleteMessage)
-        e.DELETE("/topic", home.DeleteTopic)
+        e.DELETE("/topic", topic.DeleteTopic)
 
         PORT := os.Getenv("PORT")
         if PORT == "" {

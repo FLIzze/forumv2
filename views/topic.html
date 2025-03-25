@@ -1,5 +1,5 @@
 {{ block "topic" . }}
-<p>
+<!DOCTYPE html>
 <html lang="en">
         <head>
                 <meta charset="UTF-8">
@@ -14,7 +14,6 @@
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "topic-status" . }}
 
                 <div class="home-container">
                         {{ template "topic-subject" . }}
@@ -68,14 +67,25 @@
                                 <p>{{ .Topic.FormattedCreationTime }}</p>
                         </div>
 
-                        {{ if eq .User.UUID .Topic.CreatedByUUID }}
+                        <div class="by">
+                                <img 
+                                        src="/src/loading.svg" 
+                                        alt="loading" 
+                                        class="loading" 
+                                        id="hx-indicator{{ .Topic.UUID }}"
+                                >
+
                                 <button
                                         hx-delete="/topic"
+                                        class="delete"
                                         hx-vals='{"uuid": "{{ .Topic.UUID }}", "createdBy": "{{ .Topic.CreatedByUUID }}"}'
+                                        hx-indicator="#hx-indicator{{ .Topic.UUID }}"
                                         hx-swap="outerHTML"
-                                        hx-target=".home-container"
-                                > Delete </button>
-                        {{ end }}
+                                        hx-target=".message"
+                                >  
+                                        <img src="/src/bin.svg" alt="delete" class="delete">
+                                </button>
+                        </div>
                 </div>
 
                 <p class="description">{{ .Topic.Description | safeHTML }}</p>
@@ -100,25 +110,36 @@
                                 </div>
 
                                 <div>
-                                        <button>Answer</button>
-
-                                        <button 
-                                                hx-post="/quote"
-                                                hx-vals='{"uuid": "{{ .UUID }}"}'
-                                                hx-target=".message-input"
-                                                hx-swap="none"
-                                                hx-on::after-request="
-                                                let response = JSON.parse(event.detail.xhr.responseText);
-                                                document.querySelector('#message-input').value += response.quotedContent + '\n';"
-                                        > Quote </button>
+                                        <!-- <button --> 
+                                        <!--         hx-post="/quote" -->
+                                        <!--         hx-vals='{"uuid": "{{ .UUID }}"}' -->
+                                        <!--         hx-target=".message-input" -->
+                                        <!--         hx-swap="none" -->
+                                        <!--         hx-on::after-request=" -->
+                                        <!--         let response = JSON.parse(event.detail.xhr.responseText); -->
+                                        <!--         document.querySelector('#message-input').value += response.quotedContent + '\n';" -->
+                                        <!-- > Quote </button> -->
 
                                         {{ if eq $userUUID .CreatedByUUID }}
-                                                <button
-                                                        hx-delete="/message"
-                                                        hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
-                                                        hx-swap="outerHTML"
-                                                        hx-target="#message{{ .UUID }}"
-                                                > Delete </button>
+                                                <div class="by">
+                                                        <img 
+                                                                src="/src/loading.svg" 
+                                                                alt="loading" 
+                                                                class="loading" 
+                                                                id="hx-indicator{{ .UUID }}"
+                                                        >
+
+                                                        <button
+                                                                hx-delete="/message"
+                                                                class="delete"
+                                                                hx-vals='{"uuid": "{{ .UUID }}", "createdBy": "{{ .CreatedByUUID }}"}'
+                                                                hx-indicator="#hx-indicator{{ .UUID }}"
+                                                                hx-swap="outerHTML"
+                                                                hx-target="#message{{ .UUID }}"
+                                                        >  
+                                                                <img src="/src/bin.svg" alt="delete" class="delete">
+                                                        </button>
+                                                </div>
                                         {{ end }}
                                 </div>
                         </div>

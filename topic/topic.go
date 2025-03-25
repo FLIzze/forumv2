@@ -163,8 +163,8 @@ func DeleteMessage(c echo.Context) error {
                 return c.Render(500, "topic-form", response)
         }
 
-        response.Status.Success = "Deleted topic succesfully."
-        return c.Render(200, "topic-status", response)
+        time.Sleep(1 * time.Second)
+        return c.NoContent(200)
 }
 
 func QuoteMessage(c echo.Context) error {
@@ -198,4 +198,38 @@ func QuoteMessage(c echo.Context) error {
 
         quotedContent = "> " + quotedContent 
         return c.JSON(200, map[string]string{"quotedContent": quotedContent})
+}
+
+func DeleteTopic(c echo.Context) error {
+        response := structs.HomeResponse{}
+
+        db := c.Get("db").(*sql.DB)
+        user, ok := c.Get("user").(structs.User)
+        if !ok {
+                response.Status.Error = "You must be logged in to delete a topic."
+                return c.Render(401, "home-form", response)
+        }
+
+        createdBy := c.FormValue("createdBy")
+        if createdBy != user.UUID {
+                response.Status.Error = "You must own the topic to delete it."
+                return c.Render(401, "home-form", response)
+        }
+
+        topicUUID := c.FormValue("uuid")
+        _, err := db.Exec(`
+
+        DELETE FROM
+                topic
+        WHERE 
+                uuid = ?
+        `, topicUUID)
+        if err != nil {
+                c.Logger().Error("Error deleting from topic", err)
+                response.Status.Error = "Something went wrong. Please try again later."
+                return c.Render(500, "home-form", response)
+        }
+
+        time.Sleep(1 * time.Second)
+        return c.NoContent(200)
 }

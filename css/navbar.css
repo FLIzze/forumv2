@@ -17,9 +17,11 @@
         background-color: black;
         color: white;
         padding: 4px 13px;
+        top: 0px;
+        position: relative;
+        transition: ease-in-out 0.3s;
 }
 
 .navbar-link:hover {
-        background-color: blue;
-        color: white;
+        top: -3px;
 }

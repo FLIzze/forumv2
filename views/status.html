@@ -1,9 +1,11 @@
 {{ block "status" .Status }}
-        {{ if .Error }}
-                <p class="error">{{ .Error }}</p>
-        {{ end }}
+        <div class="home-container">
+                {{ if .Error }}
+                        <p class="error">{{ .Error }}</p>
+                {{ end }}
 
-        {{ if .Success }}
-                <p class="success">{{ .Success }}</p>
-        {{ end }}
+                {{ if .Success }}
+                        <p class="success">{{ .Success }}</p>
+                {{ end }}
+        </div>
 {{ end }}

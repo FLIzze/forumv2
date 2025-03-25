@@ -104,36 +104,3 @@ func PostTopic(c echo.Context) error {
         c.Render(200, "oob-topic", response)
         return c.Render(200, "home-form", response)
 }
-
-func DeleteTopic(c echo.Context) error {
-        response := structs.HomeResponse{}
-
-        db := c.Get("db").(*sql.DB)
-        user, ok := c.Get("user").(structs.User)
-        if !ok {
-                response.Status.Error = "You must be logged in to delete a topic."
-                return c.Render(401, "home-form", response)
-        }
-
-        createdBy := c.FormValue("createdBy")
-        if createdBy != user.UUID {
-                response.Status.Error = "You must own the topic to delete it."
-                return c.Render(401, "home-form", response)
-        }
-
-        topicUUID := c.FormValue("uuid")
-        _, err := db.Exec(`
-
-        DELETE FROM
-                topic
-        WHERE 
-                uuid = ?
-        `, topicUUID)
-        if err != nil {
-                c.Logger().Error("Error deleting from topic", err)
-                response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "home-form", response)
-        }
-
-        return c.NoContent(200)
-}

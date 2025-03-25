@@ -22,6 +22,7 @@
         padding-bottom: 20px;
         margin-bottom: 15px;
         justify-content: space-between;
+        margin-right: 10px;
 }
 
 .by {
@@ -31,4 +32,26 @@
 
 .success {
         color: green;
+}
+
+.loading {
+        display: none;
+        width: 20px;
+        height: 20px;
+}
+
+.htmx-request {
+        display: block;
+}
+
+.delete {
+        width: 24px;
+        height: 24px;
+        transition: ease-in-out 0.3s;
+        top: 0px;
+        position: relative;
+}
+
+.delete:hover {
+        top: -1px;
 }

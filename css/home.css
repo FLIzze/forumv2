@@ -54,7 +54,7 @@ th {
 }
 
 .table-content:hover {
-        background-color: blue;
+        background-color: black;
         color: white;
 }
 
@@ -63,14 +63,25 @@ th {
         text-decoration: none;
 }
 
-button {
+.button-submit {
         border: none;
         background-color: black;
         color: white;
         padding: 3px 5px;
+        cursor: pointer;
 }
 
-button:hover {
-        background-color: blue;
-        color: white;
+.button-submit:hover {
+        background-color: white;
+        color: black;
+}
+
+.delete {
+        border: none;
+        background-color: white;
+        cursor: pointer;
+}
+
+.name {
+        width: 100%;
 }
