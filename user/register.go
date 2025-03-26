@@ -113,6 +113,6 @@ func PostRegister(c echo.Context) error {
                 return c.Render(500, "register-form", response)
         }
 
-        c.Response().Header().Set("HX-Redirect", "/")
+        c.Response().Header().Set("HX-Redirect", "/page/1")
 	return c.NoContent(200)
 }

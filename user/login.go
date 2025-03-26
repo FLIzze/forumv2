@@ -59,7 +59,7 @@ func PostLogin(c echo.Context) error {
                 return c.Render(500, "login-form", response)
         }
 
-        c.Response().Header().Set("HX-Redirect", "/")
+        c.Response().Header().Set("HX-Redirect", "/page/1")
 	return c.NoContent(200)
 }
 

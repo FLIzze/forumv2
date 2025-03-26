@@ -28,14 +28,20 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 }
 
 func newTemplate() *Templates {
-        safeHTML := template.FuncMap{
+        funcMap := template.FuncMap{
                 "safeHTML": func(s string) template.HTML {
-                        return template.HTML(s) 
+                        return template.HTML(s)
+                },
+                "add": func(a, b int) int {
+                        return a + b
+                },
+                "sub": func(a, b int) int {
+                        return a - b
                 },
         }
 
         return &Templates{
-                templates: template.Must(template.New("").Funcs(safeHTML).ParseGlob("views/*.html")),
+                templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("views/*.html")),
         }
 }
 
@@ -64,12 +70,14 @@ func main() {
 
         e.Use(mw.Auth)
 
-        e.GET("/", home.GetHomePage)
+        e.GET("/page/:nmb", home.GetHomePage)
+
         e.GET("/topic/:uuid", topic.GetTopic) 
-        e.GET("/login", user.GetLogin)
-        e.GET("/register", user.GetRegister)
+
         e.GET("/*", er404.Get404)
 
+        e.GET("/login", user.GetLogin)
+        e.GET("/register", user.GetRegister)
         e.POST("/login", user.PostLogin)
         e.POST("/register", user.PostRegister)
 

@@ -6,13 +6,18 @@
 .container {
         margin-left: 20%;
         padding: 60px 0;
-        gap: 30px;
+        display: flex;
+        flex-direction: column;
 }
 
 .form-container {
         display: flex;
         flex-direction: column;
         gap: 10px;
+}
+
+.submit-button {
+        width: fit-content;
 }
 
 .message-input {
@@ -23,8 +28,12 @@
         padding: 3px;
 }
 
+.form {
+        width: 500px;
+}
+
 .name-input {
-        width: 1000px;
+        width: 500px;
         font-size: medium;
         padding: 3px;
 }
@@ -38,4 +47,12 @@
         border: none;
         background-color: white;
         cursor: pointer;
+}
+
+.error {
+        color: red;
+}
+
+.success {
+        color: green;
 }

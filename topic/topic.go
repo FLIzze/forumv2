@@ -13,6 +13,7 @@ import (
 
 func GetTopic(c echo.Context) error {
         response := structs.TopicResponse{}
+        var plainContent string
         topic := structs.Topic{}
 
         UUID := c.Param("uuid")
@@ -32,11 +33,14 @@ func GetTopic(c echo.Context) error {
                 UUID = ?
         `, UUID)
 
-        err := row.Scan(&topic.UUID, &topic.Name, &topic.Description, &topic.CreatedByUsername, &topic.CreatedByUUID, 
+        err := row.Scan(&topic.UUID, &topic.Name, &plainContent, &topic.CreatedByUsername, &topic.CreatedByUUID, 
                                                                                 &topic.LastMessage, &topic.CreationTime)
         if err != nil {
                 return c.Render(404, "404", nil)
         }
+
+        htmlContent := string(blackfriday.Run([]byte(plainContent)))
+        topic.Description = htmlContent
         topic.FormattedCreationTime = utils.FormatDate(topic.CreationTime)
         topic.FormattedLastMessage = utils.FormatDate(topic.LastMessage)
         response.Topic = topic
@@ -59,7 +63,6 @@ func GetTopic(c echo.Context) error {
 
         for rows.Next() {
                 message := structs.Message{}
-                var plainContent string
                 err := rows.Scan(&message.UUID, &plainContent, &message.CreatedByUsername, &message.CreatedByUUID, 
                                                                                                 &message.CreationTime)
                 if err != nil {
@@ -83,7 +86,10 @@ func PostMessage(c echo.Context) error {
 
         message.UUID = utils.Uuid()
         message.TopicUUID = c.FormValue("uuid")
-        message.Content = c.FormValue("message")
+        messageContent := c.FormValue("message")
+        message.Content = string(blackfriday.Run([]byte(messageContent)))
+        date := time.Now()
+        message.FormattedCreationTime = utils.FormatDate(&date)
 
         user, ok := c.Get("user").(structs.User)
         if ok {
@@ -124,7 +130,6 @@ func PostMessage(c echo.Context) error {
         }
 
         response.Messages = append(response.Messages, message)
-        response.Status.Success = "Message sucessfully posted."
 
         c.Render(200, "oob-message", response)
         return c.Render(200, "topic-form", response)
@@ -210,7 +215,7 @@ func DeleteTopic(c echo.Context) error {
                 return c.Render(500, "home-form", response)
         }
 
-        c.Response().Header().Set("HX-Redirect", "/")
+        c.Response().Header().Set("HX-Redirect", "/page/1")
         return c.NoContent(200)
 }
 
@@ -272,6 +277,6 @@ func PostTopic(c echo.Context) error {
 
         response.Topics = append(response.Topics, topic)
 
-        c.Response().Header().Set("HX-Redirect", "/")
+        c.Response().Header().Set("HX-Redirect", "/page/1")
         return c.NoContent(200)
 }

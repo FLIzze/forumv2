@@ -21,6 +21,12 @@ type HomeResponse struct {
         Status Status
         Topics []Topic
         User User
+        Page Page
+}
+
+type Page struct {
+        TotalPage int
+        CurrentPage int
 }
 
 type Topic struct {

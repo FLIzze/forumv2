@@ -9,6 +9,6 @@ import (
 func LogOut(c echo.Context) error {
         cookie.RemoveCookie(c)
 
-        c.Response().Header().Set("HX-Redirect", "/")
+        c.Response().Header().Set("HX-Redirect", "/page/1")
 	return c.NoContent(200)
 }
