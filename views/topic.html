@@ -17,7 +17,9 @@
 
                 <div class="topic-container">
                         {{ template "topic-subject" . }}
+                        {{ template "topic-toolbar" . }}
                         {{ template "topic-message" . }}
+                        {{ template "topic-toolbar" . }}
                         {{ template "topic-form" . }}
                 </div>
 
@@ -33,6 +35,14 @@
                 </script>
         </body>
 </html>
+{{ end }}
+
+{{ block "topic-toolbar" . }}
+        <div class="toolbar">
+                <a href="/topic/{{ .Topic.UUID}}/{{ sub .Page.CurrentPage 1 }}" class="button">Previous</a>
+        
+                <a href="/topic/{{ .Topic.UUID}}/{{ add .Page.CurrentPage 1 }}" class="button">Next</a>
+        </div>
 {{ end }}
 
 {{ block "topic-status" . }}

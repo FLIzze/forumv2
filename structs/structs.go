@@ -48,6 +48,7 @@ type TopicResponse struct {
         Messages []Message
         User User
         QuotedMessage string
+        Page Page
 }
 
 type Message struct {

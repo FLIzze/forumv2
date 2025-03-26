@@ -61,9 +61,13 @@
                 class="form"
                 hx-swap="outerHTML"
         >
-                <input type="text" name="name" placeholder="name" class="name-input" maxlength="95"/>
-                <textarea type="text" name="message" placeholder="description" class="message-input"></textarea>
-                <button type="submit" class="button-submit">Post topic</button>
+                {{ if .User.UUID }}
+                        <button type="submit" class="button-submit">Post topic</button>
+                        <input type="text" name="name" placeholder="name" class="name-input" maxlength="95"/>
+                        <textarea type="text" name="message" placeholder="description" class="message-input"></textarea>
+                {{ else }}
+                        <p>Login to post a topic</p>
+                {{ end }}
 
                 {{ template "status" .Status }}
         </form>
@@ -83,7 +87,7 @@
 
         {{ range .Topics }}
                 <tr id="topic{{ .UUID }}" class="table-content">
-                        <td><a class="link" href="/topic/{{ .UUID }}">{{ .Name }}</a></td>
+                        <td><a class="link" href="/topic/{{ .UUID }}/1">{{ .Name }}</a></td>
                         <td><a class="link" href="/user/{{ .CreatedByUsername }}">{{ .CreatedByUsername }}</a></td>
                         <td>{{ .NmbMessages }}</td>
                         <td>{{ .FormattedLastMessage }}</td>

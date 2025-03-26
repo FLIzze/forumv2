@@ -72,7 +72,7 @@ func main() {
 
         e.GET("/page/:nmb", home.GetHomePage)
 
-        e.GET("/topic/:uuid", topic.GetTopic) 
+        e.GET("/topic/:uuid/:nmb", topic.GetTopic) 
 
         e.GET("/*", er404.Get404)
 

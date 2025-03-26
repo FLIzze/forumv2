@@ -2,10 +2,11 @@ package forum
 
 import (
 	"database/sql"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
-        "github.com/russross/blackfriday/v2"
+	"github.com/russross/blackfriday/v2"
 
 	structs "forum/structs"
 	utils "forum/utils"
@@ -13,10 +14,25 @@ import (
 
 func GetTopic(c echo.Context) error {
         response := structs.TopicResponse{}
-        var plainContent string
         topic := structs.Topic{}
+        page := structs.Page{}
 
         UUID := c.Param("uuid")
+        strPage := c.Param("nmb")
+        intPage, err := strconv.Atoi(strPage)
+        if err != nil || intPage < 1 {
+                c.Logger().Error("Error during Atoi: ", err)
+                response.Status.Error = "Invalid Page number"
+                return c.Render(400, "home", response)
+        }
+
+        page.CurrentPage = intPage
+        intPage -= 1
+
+        MAX_MESSAGES_DISPLAYED := 15
+        OFFSET := MAX_MESSAGES_DISPLAYED * intPage
+        LIMIT := MAX_MESSAGES_DISPLAYED
+
         user, ok := c.Get("user").(structs.User)
         if ok {
                 response.User = user
@@ -33,7 +49,9 @@ func GetTopic(c echo.Context) error {
                 UUID = ?
         `, UUID)
 
-        err := row.Scan(&topic.UUID, &topic.Name, &plainContent, &topic.CreatedByUsername, &topic.CreatedByUUID, 
+        var plainContent string
+
+        err = row.Scan(&topic.UUID, &topic.Name, &plainContent, &topic.CreatedByUsername, &topic.CreatedByUUID, 
                                                                                 &topic.LastMessage, &topic.CreationTime)
         if err != nil {
                 return c.Render(404, "404", nil)
@@ -52,7 +70,11 @@ func GetTopic(c echo.Context) error {
                 messageInfo
         WHERE 
                 TopicUUID = ?
-        `, UUID)
+        LIMIT
+                ?
+        OFFSET 
+                ?
+        `, UUID, LIMIT, OFFSET)
         if err != nil {
                 c.Logger().Error("Error retrieving topic message: ", err)
                 response.Status.Error = "Could not retrieve topic message."
@@ -76,6 +98,8 @@ func GetTopic(c echo.Context) error {
                 message.FormattedCreationTime = utils.FormatDate(message.CreationTime)
                 response.Messages = append(response.Messages, message)
         }
+
+        response.Page = page
 
         return c.Render(200, "topic", response)
 }

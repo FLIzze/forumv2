@@ -56,3 +56,9 @@
 .success {
         color: green;
 }
+
+.toolbar {
+        width: max-content;
+        display: flex;
+        justify-content: space-between;
+}
