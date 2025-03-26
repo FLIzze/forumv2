@@ -12,13 +12,7 @@ import (
 func GetProfil(c echo.Context) error {
         response := structs.ProfilResponse{} 
         userProfil := structs.User{}
-
-        user, ok := c.Get("user").(structs.User)
-        if !ok {
-                return c.HTML(401, `You must be logged in order to view a profil. <a href="/">home</a> <a href="/login">login</a>`)
-        } else {
-                response.User = user
-        }
+        response.User = c.Get("user").(structs.User)
 
         db := c.Get("db").(*sql.DB)
         username := c.Param("username")
@@ -46,13 +40,7 @@ func GetProfil(c echo.Context) error {
 
 func GetMeProfil(c echo.Context) error {
         response := structs.ProfilResponse{}
-
-        user, ok := c.Get("user").(structs.User)
-        if !ok {
-                return c.HTML(401, `You must be logged in order to view your profil. <a href="/">home</a> <a href="/login">login</a>`)
-        } else {
-                response.User = user
-        }
+        response.User = c.Get("user").(structs.User)
 
         return c.Render(200, "meProfil", response)
 }

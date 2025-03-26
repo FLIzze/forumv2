@@ -10,11 +10,12 @@
                         crossorigin="anonymous">
                 </script>
                 <link href="/css/home.css" rel="stylesheet">
+                <link href="/css/main.css" rel="stylesheet">
         </head>
         <body>
                 {{ template "navbar" . }}
 
-                <div class="home-container">
+                <div class="container">
                         {{ template "home-table" . }}
                 </div>
 
@@ -35,10 +36,7 @@
 {{ block "home-table" . }}
         <table>
                 {{ template "home-table-header" . }}
-
-                <tbody id="topic-display">
-                        {{ template "home-table-content" . }}
-                </tbody>
+                {{ template "home-table-content" . }}
         </table>
 {{ end }}
 
@@ -48,13 +46,9 @@
                 class="form"
                 hx-swap="outerHTML"
         >
-                {{ if .User.UUID }}
-                        <input type="text" name="name" placeholder="name" class="name-input" maxlength="95"/>
-                        <textarea type="text" name="message" placeholder="description" class="message-input"></textarea>
-                        <button type="submit" class="button-submit">Post topic</button>
-                {{ else }}
-                        <p>Login to post a topic</p>
-                {{ end }}
+                <input type="text" name="name" placeholder="name" class="name-input" maxlength="95"/>
+                <textarea type="text" name="message" placeholder="description" class="message-input"></textarea>
+                <button type="submit" class="button-submit">Post topic</button>
 
                 {{ template "status" .Status }}
         </form>
@@ -80,10 +74,4 @@
                         <td>{{ .FormattedLastMessage }}</td>
                 </tr>
         {{ end }}
-{{ end }}
-
-{{ block "oob-topic" . }}
-        <tbody id="topic-display" hx-swap-oob="afterbegin">
-                {{ template "home-table-content" . }}
-        </tbody>
 {{ end }}

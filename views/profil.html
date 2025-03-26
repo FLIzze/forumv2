@@ -9,11 +9,14 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link href="/css/main.css" rel="stylesheet">
         </head>
         <body>
                 {{ template "navbar" . }}
-                {{ template "profil-status" . }}
-                {{ template "userInfo" .UserProfil }}
+
+                <div class="container">
+                        {{ template "userInfo" .UserProfil }}
+                </div>
         </body>
 </html>
 {{ end }}
@@ -23,23 +26,18 @@
 {{ end }}
 
 {{ block "userInfo" .UserProfil }}
-        </br>
-        </br>
-        Username: {{ .Username }}
-        </br>
-        CreationTime: {{ .FormattedCreationTime }}
-        </br>
-        NmbMessagesPosted: {{ .NmbMessagesPosted }}
-        </br>
-        NmbTopicsCreated: {{ .NmbTopicsCreated }}
-        </br>
+        <div class="flex">
+                <p>Username: {{ .Username }}</p>
+                <p>CreationTime: {{ .FormattedCreationTime }}</p>
+                <p>NmbMessagesPosted: {{ .NmbMessagesPosted }}</p>
+                <p>NmbTopicsCreated: {{ .NmbTopicsCreated }}</p>
 
-        {{ if .LastMessage }}
-                LastMessage: {{ .LastMessage }}
-        {{ end }}
-        </br>
+                {{ if .LastMessage }}
+                        <p>LastMessage: {{ .LastMessage }}</p>
+                {{ end }}
 
-        {{ if .LastTopic }}
-                LastTopic: {{ .LastTopic }}
-        {{ end }}
+                {{ if .LastTopic }}
+                        <p>LastTopic: {{ .LastTopic }}</p>
+                {{ end }}
+        </div>
 {{ end }}

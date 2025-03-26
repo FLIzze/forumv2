@@ -9,11 +9,14 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link href="/css/main.css" rel="stylesheet">
         </head>
         <body>
-                <a href="/">home</a>
-                {{ template "login-form" . }}
-                {{ template "goto-register" . }}
+                {{ template "navbar" . }}
+
+                <div class="container">
+                        {{ template "login-form" . }}
+                </div>
 
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
@@ -37,10 +40,8 @@
                 <input type="text" placeholder="username" name="username"/>
                 <input type="password" placeholder="password" name="password"/>
                 <button type="submit">login</button>
+
+                <p>No account ? <a href="/register">register</a></p>
                 {{ template "status" . }}
         </form>
-{{ end }}
-
-{{ block "goto-register" . }}
-        <p>No account ? <a href="/register">register</a></p>
 {{ end }}

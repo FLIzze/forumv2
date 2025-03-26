@@ -1,0 +1,41 @@
+* {
+        margin: 0;
+        padding: 0;
+}
+
+.container {
+        margin-left: 20%;
+        padding: 60px 0;
+        gap: 30px;
+}
+
+.form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+}
+
+.message-input {
+        font-size: large;
+        width: 500px;
+        height: 300px;
+        resize: none;
+        padding: 3px;
+}
+
+.name-input {
+        width: 1000px;
+        font-size: medium;
+        padding: 3px;
+}
+
+.flex {
+        display: flex;
+        flex-direction: column;
+}
+
+.delete {
+        border: none;
+        background-color: white;
+        cursor: pointer;
+}

@@ -28,11 +28,8 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 }
 
 func newTemplate() *Templates {
-        // p := bluemonday.UGCPolicy()
-
         safeHTML := template.FuncMap{
                 "safeHTML": func(s string) template.HTML {
-                        // sanitized := p.Sanitize(s) 
                         return template.HTML(s) 
                 },
         }
@@ -49,10 +46,10 @@ func main() {
         }
 
         e := echo.New()
-        e.Use(middleware.Logger())
-
         e.Static("/css", "css")  
         e.Static("/src", "src")
+
+        e.Use(middleware.Logger())
 
         e.Renderer = newTemplate()
 
@@ -64,28 +61,34 @@ func main() {
                         return next(c)
                 }
         })
-        e.Use(mw.AuthMiddleware)
+
+        e.Use(mw.Auth)
 
         e.GET("/", home.GetHomePage)
         e.GET("/topic/:uuid", topic.GetTopic) 
         e.GET("/login", user.GetLogin)
         e.GET("/register", user.GetRegister)
-        e.GET("/me", user.GetMeProfil)
-        e.GET("/user/:username", user.GetProfil)
-        e.GET("/postTopic", post.Topic)
-        e.GET("/postMessage", post.Topic)
         e.GET("/*", er404.Get404)
 
         e.POST("/login", user.PostLogin)
         e.POST("/register", user.PostRegister)
 
-        e.POST("/topic", home.PostTopic)
-        e.POST("/message", topic.PostMessage)
-        e.POST("/quote", topic.QuoteMessage)
-        e.POST("/logout", user.LogOut)
+        authGroup := e.Group("")
+        authGroup.Use(mw.RequireAuth) 
 
-        e.DELETE("/message", topic.DeleteMessage)
-        e.DELETE("/topic", topic.DeleteTopic)
+        { 
+                authGroup.GET("/me", user.GetMeProfil)
+                authGroup.GET("/user/:username", user.GetProfil)
+                authGroup.GET("/postTopic", topic.GetPostTopic)
+
+                authGroup.POST("/topic", topic.PostTopic)
+                authGroup.POST("/message", topic.PostMessage)
+                authGroup.POST("/quote", topic.QuoteMessage)
+                authGroup.POST("/logout", user.LogOut)
+
+                authGroup.DELETE("/message", topic.DeleteMessage)
+                authGroup.DELETE("/topic", topic.DeleteTopic)
+        }
 
         PORT := os.Getenv("PORT")
         if PORT == "" {

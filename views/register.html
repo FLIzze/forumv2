@@ -9,6 +9,15 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link href="/css/main.css" rel="stylesheet">
+        </head>
+        <body>
+                {{ template "navbar" . }}
+
+                <div class="container">
+                        {{ template "register-form" . }}
+                </div>
+
                 <script>
                         document.addEventListener("DOMContentLoaded", (event) => {
                                 document.body.addEventListener("htmx:beforeSwap", function(evt) {
@@ -19,11 +28,6 @@
                                 });
                         });
                 </script>
-        </head>
-        <body>
-                <a href="/">home</a>
-                {{ template "register-form" . }}
-                {{ template "goto-login" . }}
         </body>
 </html>
 {{ end }}
@@ -38,10 +42,8 @@
                 <input type="password" placeholder="password" name="password"/>
                 <input type="password" placeholder="repeat password" name="password-confirm"/>
                 <button type="submit">create account</button>
+
+                <p>Alreayd have an account ?<a href="/login">login</a></p>
                 {{ template "status" . }}
         </form>
-{{ end }}
-
-{{ block "goto-login" . }}
-        <p>Alreayd have an account ?<a href="/login">login</a></p>
 {{ end }}

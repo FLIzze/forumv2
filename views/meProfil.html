@@ -9,16 +9,21 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
+                <link href="/css/main.css" rel="stylesheet">
         </head>
         <body>
-                <a href="/">home</a>
-                </br>
-                <button 
-                        hx-post="/logout"
-                        hx-swap="outerHTML"
-                >logout</button>
+                {{ template "navbar" . }}
 
-                {{ template "userInfo" .User }}
+                <div class="container">
+                        <div>
+                                <button 
+                                        hx-post="/logout"
+                                        hx-swap="outerHTML"
+                                >logout</button>
+
+                                {{ template "userInfo" .User }}
+                        </div>
+                </div>
         </body>
 </html>
 {{ end }}

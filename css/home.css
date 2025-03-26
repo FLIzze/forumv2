@@ -11,31 +11,12 @@
         margin-top: 30px;
 }
 
-.message-input {
-        font-size: large;
-        width: 1000px;
-        height: 600px;
-        resize: none;
-        padding: 3px;
-}
-
-.name-input {
-        width: 1000px;
-        font-size: medium;
-        padding: 3px;
-}
-
-.home-container {
-        margin-left: 20%;
-        padding: 60px 0;
-}
-
 .name-header {
         width: 450px;
 }
 
 table {
-        width: 70%;
+        width: 80%;
         border-spacing: 0;
         border-collapse: separate; 
 }
@@ -66,22 +47,6 @@ th {
 .link {
         color: inherit;
         text-decoration: none;
-}
-
-.button-submit {
-        border: none;
-        background-color: black;
-        color: white;
-        padding: 3px 5px;
-        cursor: pointer;
-        height: 35px;
-        width: 1000px;
-}
-
-.delete {
-        border: none;
-        background-color: white;
-        cursor: pointer;
 }
 
 .name {

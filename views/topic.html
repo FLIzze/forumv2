@@ -9,13 +9,13 @@
                         integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" 
                         crossorigin="anonymous">
                 </script>
-                <link href="/css/home.css" rel="stylesheet">
                 <link href="/css/topic.css" rel="stylesheet">
+                <link href="/css/main.css" rel="stylesheet">
         </head>
         <body>
                 {{ template "navbar" . }}
 
-                <div class="home-container">
+                <div class="container">
                         {{ template "topic-subject" . }}
                         {{ template "topic-message" . }}
                 </div>
@@ -74,16 +74,18 @@
                                         id="hx-indicator{{ .Topic.UUID }}"
                                 >
 
-                                <button
-                                        hx-delete="/topic"
-                                        class="delete"
-                                        hx-vals='{"uuid": "{{ .Topic.UUID }}", "createdBy": "{{ .Topic.CreatedByUUID }}"}'
-                                        hx-indicator="#hx-indicator{{ .Topic.UUID }}"
-                                        hx-swap="outerHTML"
-                                        hx-target=".message"
-                                >  
-                                        <img src="/src/bin.svg" alt="delete" class="delete">
-                                </button>
+                                {{ if eq .User.UUID .Topic.CreatedByUUID }}
+                                        <button
+                                                hx-delete="/topic"
+                                                class="delete"
+                                                hx-vals='{"uuid": "{{ .Topic.UUID }}", "createdBy": "{{ .Topic.CreatedByUUID }}"}'
+                                                hx-indicator="#hx-indicator{{ .Topic.UUID }}"
+                                                hx-swap="outerHTML"
+                                                hx-target=".message"
+                                        >  
+                                                <img src="/src/bin.svg" alt="delete" class="delete">
+                                        </button>
+                                {{ end }}
                         </div>
                 </div>
 
