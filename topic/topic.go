@@ -2,109 +2,33 @@ package forum
 
 import (
 	"database/sql"
-	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/russross/blackfriday/v2"
 
 	structs "forum/structs"
 	utils "forum/utils"
 )
 
-func GetTopic(c echo.Context) error {
-        response := structs.TopicResponse{}
-        topic := structs.Topic{}
-        page := structs.Page{}
+func GetTopicPage(c echo.Context) error {
+        var response structs.TopicResponse
 
-        UUID := c.Param("uuid")
-        strPage := c.Param("nmb")
-        intPage, err := strconv.Atoi(strPage)
-        if err != nil || intPage < 1 {
-                c.Logger().Error("Error during Atoi: ", err)
-                response.Status.Error = "Invalid Page number"
-                return c.Render(400, "home", response)
+        topic, err := utils.GetTopic(c)
+        if err.IsError() {
+                err.HandleError(c)
+                response.Status.Error = err.Message
+                return c.Render(err.Status, "topic", response)
         }
-
-        page.CurrentPage = intPage
-        intPage -= 1
-
-        conf, err := utils.GetConfig()
-        if err != nil {
-                c.Logger().Info("Error retrieving config: ", err)
-                conf.MaxMessagePerPage = 30
-        }
-
-        OFFSET := conf.MaxMessagePerPage * intPage
-        LIMIT := conf.MaxMessagePerPage
-
-        user, ok := c.Get("user").(structs.User)
-        if ok {
-                response.User = user
-        }
-
-        db := c.Get("db").(*sql.DB)
-
-        row := db.QueryRow(`
-        SELECT 
-                UUID, Name, Description, CreatedByUsername, CreatedByUUID, LastMessage, CreationTime
-        FROM 
-                topicInfo
-        WHERE 
-                UUID = ?
-        `, UUID)
-
-        var plainContent string
-
-        err = row.Scan(&topic.UUID, &topic.Name, &plainContent, &topic.CreatedByUsername, &topic.CreatedByUUID, 
-                                                                                &topic.LastMessage, &topic.CreationTime)
-        if err != nil {
-                return c.Render(404, "404", nil)
-        }
-
-        htmlContent := string(blackfriday.Run([]byte(plainContent)))
-        topic.Description = htmlContent
-        topic.FormattedCreationTime = utils.FormatDate(topic.CreationTime)
-        topic.FormattedLastMessage = utils.FormatDate(topic.LastMessage)
         response.Topic = topic
+        response.User = c.Get("user").(structs.User)
 
-        rows, err := db.Query(`
-        SELECT 
-                UUID, Content, CreatedByUsername, CreatedByUUID, CreationTime
-        FROM 
-                messageInfo
-        WHERE 
-                TopicUUID = ?
-        LIMIT
-                ?
-        OFFSET 
-                ?
-        `, UUID, LIMIT, OFFSET)
-        if err != nil {
-                c.Logger().Error("Error retrieving topic message: ", err)
-                response.Status.Error = "Could not retrieve topic message."
-                return c.Render(500, "topic", response)
+        messages, err := utils.GetMessages(c)
+        if err.IsError() {
+                err.HandleError(c)
+                response.Status.Error = err.Message
+                return c.Render(err.Status, "topic", response)
         }
-        defer rows.Close()
-
-
-        for rows.Next() {
-                message := structs.Message{}
-                err := rows.Scan(&message.UUID, &plainContent, &message.CreatedByUsername, &message.CreatedByUUID, 
-                                                                                                &message.CreationTime)
-                if err != nil {
-                        c.Logger().Error("Error retrieving topic message from column: ", err)
-                        response.Status.Error = "Something went wrong. Please try again later."
-                        return c.Render(500, "topic", response)
-                }
-
-                htmlContent := string(blackfriday.Run([]byte(plainContent)))
-                message.Content = htmlContent
-                message.FormattedCreationTime = utils.FormatDate(message.CreationTime)
-                response.Messages = append(response.Messages, message)
-        }
-
-        response.Page = page
+        response.Messages = messages
 
         return c.Render(200, "topic", response)
 }

@@ -90,10 +90,8 @@ func CreateView(db *sql.DB) error {
                 u.Email,
                 s.SessionUUID,
                 s.Connected
-        FROM 
-                user u
-        JOIN 
-                session s ON u.UUID = s.UserUUID;
+        FROM user u
+        JOIN session s ON u.UUID = s.UserUUID;
         `)
         if err != nil {
                 return err 
@@ -111,27 +109,18 @@ func CreateView(db *sql.DB) error {
                 u.Username AS CreatedByUsername,
                 COUNT(m.UUID) AS NmbMessages,
                 COALESCE(
-                        (SELECT 
-                                m2.CreationTime
-                                FROM 
-                                        message m2 
-                                WHERE 
-                                        m2.TopicUUID = t.UUID 
-                                ORDER BY 
-                                        m2.CreationTime DESC 
+                        (SELECT m2.CreationTime
+                                FROM message m2 
+                                WHERE m2.TopicUUID = t.UUID 
+                                ORDER BY m2.CreationTime DESC 
                         LIMIT 1),
                         t.CreationTime
                 ) AS LastMessage
-        FROM 
-                topic t 
-        LEFT JOIN 
-                user u ON t.CreatedBy = u.UUID 
-        LEFT JOIN 
-                message m ON t.UUID = m.TopicUUID 
-        GROUP BY 
-                t.UUID, t.Name, t.Description, u.Username
-        ORDER BY 
-                LastMessage DESC
+        FROM topic t 
+        LEFT JOIN user u ON t.CreatedBy = u.UUID 
+        LEFT JOIN message m ON t.UUID = m.TopicUUID 
+        GROUP BY t.UUID, t.Name, t.Description, u.Username
+        ORDER BY LastMessage DESC
         `)
         if err != nil {
                 return err 
@@ -147,12 +136,9 @@ func CreateView(db *sql.DB) error {
                 m.Pinned,
                 u.Username as CreatedByUsername,
                 u.UUID as CreatedByUUID
-        FROM 
-                message m 
-        JOIN 
-                user u ON m.CreatedBy = u.UUID
-        ORDER BY
-               CreationTime ASC 
+        FROM message m 
+        JOIN user u ON m.CreatedBy = u.UUID
+        ORDER BY CreationTime ASC 
         `)
         if err != nil {
                 return err 
@@ -176,14 +162,10 @@ func CreateView(db *sql.DB) error {
                         FROM topic t2 
                         WHERE t2.CreatedBy = u.UUID
                 ) AS LastTopic
-        FROM 
-                user u
-        LEFT JOIN 
-                message m ON u.UUID = m.CreatedBy
-        LEFT JOIN 
-                topic t ON u.UUID = t.CreatedBy
-        GROUP BY 
-                u.UUID, u.Username, u.CreationTime;
+        FROM user u
+        LEFT JOIN message m ON u.UUID = m.CreatedBy
+        LEFT JOIN topic t ON u.UUID = t.CreatedBy
+        GROUP BY u.UUID, u.Username, u.CreationTime;
         `)
 
         return err

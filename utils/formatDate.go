@@ -20,7 +20,6 @@ func FormatDate(date *time.Time) string {
         switch {
         case duration < time.Minute:
                 return "now"
-
         case duration < time.Hour:
                 minutes := int(duration.Minutes())
                 if minutes == 1 {
@@ -28,7 +27,6 @@ func FormatDate(date *time.Time) string {
                 }
 
                 return fmt.Sprintf("%d minutes ago", minutes)
-
         case duration < day:
                 hours := int(duration.Hours())
                 if hours == 1 {
@@ -36,14 +34,11 @@ func FormatDate(date *time.Time) string {
                 }
 
                 return fmt.Sprintf("%d hours ago", hours)
-
         case duration < yesterday:
                 return "yesterday"
-
         case duration < month:
                 days := int(duration.Hours() / 24)
                 return fmt.Sprintf("%d days ago", days)
-
         case duration < year:
                 months := int(duration.Hours()) / (30 * 24)
                 if months == 1 {
@@ -51,7 +46,6 @@ func FormatDate(date *time.Time) string {
                 }
 
                 return fmt.Sprintf("%d months ago", months)
-
         default:
                 years := int(duration.Hours()) / (365 * 24)
                 if years == 1 {

@@ -2,6 +2,8 @@ package forum
 
 import (
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 type User struct {
@@ -75,6 +77,45 @@ type Status struct {
 type Config struct {
         Host string
         Port string
-        MaxTopicPerPage int
-        MaxMessagePerPage int
+        TopicsPerPage int
+        MessagesPerPage int
+}
+
+type Error struct {
+        Err error
+        Status int
+        Message string
+}
+
+func NewError(err error, status int, message string) Error {
+        return Error {
+                Err: err,
+                Status: status,
+                Message: message,
+        }
+}
+
+func (e Error) IsError() bool {
+        return e.Err != nil
+}
+
+func (e Error) HandleError(c echo.Context) error {
+        switch e.Status {
+        case 404:
+                return c.Render(e.Status, "404", nil)
+        case 401:
+                //later on notification center
+                e.Message = "You need to login to perform this action."
+                return c.Render(e.Status, "404", nil)
+        case 422:
+                //later on notification center
+                e.Message = "Invalid Input."
+                return c.Render(e.Status, "404", nil)
+        case 500:
+                //later on notification center
+                e.Message = "Something went wrong. Please wait and try again."
+                return c.Render(e.Status, "404", nil)
+        default:
+                return nil
+        }
 }

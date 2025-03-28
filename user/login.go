@@ -74,5 +74,6 @@ func Login(db *sql.DB, uuid, sessionUUID string, c echo.Context) error {
         }
 
         cookie.PostCookie(c, sessionUUID)
+
         return nil
 }

@@ -71,8 +71,7 @@ func main() {
         e.Use(mw.Auth)
 
         e.GET("/page/:nmb", home.GetHomePage)
-
-        e.GET("/topic/:uuid/:nmb", topic.GetTopic) 
+        e.GET("/topic/:uuid/:nmb", topic.GetTopicPage) 
 
         e.GET("/*", er404.Get404)
 

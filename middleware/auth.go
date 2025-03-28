@@ -27,12 +27,9 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
                 currentUser.SessionUUID = cookie.Value
 
                 row := db.QueryRow(`
-                SELECT 
-                        UserUUID
-                FROM 
-                        userSession 
-                WHERE 
-                        SessionUUID = ?
+                SELECT UserUUID
+                FROM userSession 
+                WHERE SessionUUID = ?
                 `, currentUser.SessionUUID)
 
                 err = row.Scan(&currentUser.UUID)
@@ -42,12 +39,9 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
                 }
 
                 row = db.QueryRow(`
-                SELECT
-                        Username, CreationTime, NmbMessagesPosted, NmbTopicsCreated, LastMessage, LastTopic
-                FROM
-                        userInfo
-                WHERE 
-                        UserUUID = ?
+                SELECT Username, CreationTime, NmbMessagesPosted, NmbTopicsCreated, LastMessage, LastTopic
+                FROM userInfo
+                WHERE UserUUID = ?
                 `, currentUser.UUID)
 
                 err = row.Scan(&currentUser.Username, &currentUser.CreationTime, &currentUser.NmbMessagesPosted, 
