@@ -62,3 +62,11 @@
         display: flex;
         justify-content: space-between;
 }
+
+.notification {
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        border: 1px black solid;
+        padding: 5px;
+}

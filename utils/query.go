@@ -22,7 +22,6 @@ func GetTopics(c echo.Context) ([]structs.Topic, structs.Error) {
         page, err := GetCurrentPage(c)
         if err != nil {
                 c.Logger().Info("Error retrieving current page: ", err)
-                page = 0
         }
 
         db := c.Get("db").(*sql.DB)
@@ -47,7 +46,7 @@ func GetTopics(c echo.Context) ([]structs.Topic, structs.Error) {
                         &topic.CreatedByUUID, &topic.NmbMessages, &topic.LastMessage, &topic.CreationTime)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        return nil, structs.NewError(err, 422, "Something went wrong. Please try again Later.")
+                        return nil, structs.NewError(err, 500, "Something went wrong. Please try again Later.")
                 }
 
                 topic.FormattedCreationTime = FormatDate(topic.CreationTime)

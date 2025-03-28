@@ -95,26 +95,23 @@ func NewError(err error, status int, message string) Error {
         }
 }
 
-func (e Error) IsError() bool {
-        return e.Err != nil
-}
-
 func (e Error) HandleError(c echo.Context) error {
+        if e.Err == nil {
+                return nil
+        }
+
         switch e.Status {
+        case 401:
+                e.Message = "You need to login to perform this action."
+                return c.Render(e.Status, "notification-center", nil)
         case 404:
                 return c.Render(e.Status, "404", nil)
-        case 401:
-                //later on notification center
-                e.Message = "You need to login to perform this action."
-                return c.Render(e.Status, "404", nil)
         case 422:
-                //later on notification center
                 e.Message = "Invalid Input."
-                return c.Render(e.Status, "404", nil)
+                return c.Render(e.Status, "notification-center", nil)
         case 500:
-                //later on notification center
                 e.Message = "Something went wrong. Please wait and try again."
-                return c.Render(e.Status, "404", nil)
+                return c.Render(e.Status, "notification-center", nil)
         default:
                 return nil
         }

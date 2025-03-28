@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/russross/blackfriday/v2"
 
 	structs "forum/structs"
 	utils "forum/utils"
@@ -14,20 +15,16 @@ func GetTopicPage(c echo.Context) error {
         var response structs.TopicResponse
 
         topic, err := utils.GetTopic(c)
-        if err.IsError() {
-                err.HandleError(c)
-                response.Status.Error = err.Message
-                return c.Render(err.Status, "topic", response)
-        }
+        err.HandleError(c)
+
         response.Topic = topic
-        response.User = c.Get("user").(structs.User)
+        user, ok := c.Get("user").(structs.User)
+        if ok {
+                response.User = user
+        }
 
         messages, err := utils.GetMessages(c)
-        if err.IsError() {
-                err.HandleError(c)
-                response.Status.Error = err.Message
-                return c.Render(err.Status, "topic", response)
-        }
+        err.HandleError(c)
         response.Messages = messages
 
         return c.Render(200, "topic", response)
@@ -48,14 +45,13 @@ func PostMessage(c echo.Context) error {
         if ok {
                 response.User = user
         }
+        db := c.Get("db").(*sql.DB)
 
         if message.Content == "" {
                 c.Logger().Error("Message empty")
                 response.Status.Error = "Message must be filled"
                 return c.Render(422, "topic-form", response)
         }
-
-        db := c.Get("db").(*sql.DB)
 
         _, err := db.Exec(`
         INSERT INTO message (UUID, TopicUUID, Content, CreatedBy, CreationTime) 
@@ -68,12 +64,9 @@ func PostMessage(c echo.Context) error {
         }
 
         row := db.QueryRow(`
-        SELECT 
-                CreatedByUsername, CreatedByUUID, TopicUUID
-        FROM 
-                messageInfo
-        WHERE
-                uuid = ?
+        SELECT CreatedByUsername, CreatedByUUID, TopicUUID
+        FROM messageInfo
+        WHERE uuid = ?
         `, message.UUID)
         err = row.Scan(&message.CreatedByUsername, &message.CreatedByUUID, &response.Topic.UUID)
         if err != nil {
@@ -102,10 +95,8 @@ func DeleteMessage(c echo.Context) error {
         }
 
         _, err := db.Exec(`
-        DELETE FROM 
-                message
-        WHERE 
-               uuid = ? 
+        DELETE FROM message
+        WHERE uuid = ? 
         `, uuid)
         if err != nil {
                 c.Logger().Error("Error deleting from message: ", err)
@@ -124,12 +115,9 @@ func QuoteMessage(c echo.Context) error {
 
         var quotedContent string
         row := db.QueryRow(`
-        SELECT 
-                Content 
-        FROM 
-                message 
-        WHERE 
-                UUID = ?
+        SELECT Content 
+        FROM message 
+        WHERE UUID = ?
         `, messageUUID)
 
         err := row.Scan(&quotedContent)
@@ -157,10 +145,8 @@ func DeleteTopic(c echo.Context) error {
         }
 
         _, err := db.Exec(`
-        DELETE FROM
-                topic
-        WHERE
-                uuid = ?
+        DELETE FROM topic
+        WHERE uuid = ?
         `, topicUUID)
         if err != nil {
                 c.Logger().Error("Error deleting from topic", err)
@@ -214,12 +200,9 @@ func PostTopic(c echo.Context) error {
         }
 
         row := db.QueryRow(`
-        SELECT 
-                CreatedByUsername, CreatedByUUID, NmbMessages 
-        FROM 
-                topicInfo
-        WHERE 
-                UUID = ?
+        SELECT CreatedByUsername, CreatedByUUID, NmbMessages 
+        FROM topicInfo
+        WHERE UUID = ?
         `, topic.UUID)
         err = row.Scan(&topic.CreatedByUsername, &topic.CreatedByUUID, &topic.NmbMessages)
         if err != nil {

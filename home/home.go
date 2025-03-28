@@ -11,13 +11,14 @@ func GetHomePage(c echo.Context) error {
         response := structs.HomeResponse{}
 
         topics, err := utils.GetTopics(c)
-        if err.IsError() {
-                err.HandleError(c)
-                response.Status.Error = err.Message
-                return c.Render(err.Status, "home", response)
-        }
+        err.HandleError(c)
+
         response.Topics = topics
-        response.User = c.Get("user").(structs.User)
+        user, ok := c.Get("user").(structs.User)
+        if ok {
+                response.User = user
+        }
+
 
         return c.Render(200, "home", response)
 }
