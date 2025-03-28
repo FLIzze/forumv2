@@ -29,9 +29,14 @@ func GetTopic(c echo.Context) error {
         page.CurrentPage = intPage
         intPage -= 1
 
-        MAX_MESSAGES_DISPLAYED := 15
-        OFFSET := MAX_MESSAGES_DISPLAYED * intPage
-        LIMIT := MAX_MESSAGES_DISPLAYED
+        conf, err := utils.GetConfig()
+        if err != nil {
+                c.Logger().Info("Error retrieving config: ", err)
+                conf.MaxMessagePerPage = 30
+        }
+
+        OFFSET := conf.MaxMessagePerPage * intPage
+        LIMIT := conf.MaxMessagePerPage
 
         user, ok := c.Get("user").(structs.User)
         if ok {

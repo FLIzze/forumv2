@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -17,6 +16,7 @@ import (
 	mw "forum/middleware"
 	topic "forum/topic"
 	user "forum/user"
+        utils "forum/utils"
 )
 
 type Templates struct {
@@ -48,7 +48,7 @@ func newTemplate() *Templates {
 func main() {
         err := godotenv.Load(".env")
         if err != nil {
-                log.Fatal("Error loading .env file")        
+                log.Fatal("Error loading .env file: ")        
         }
 
         e := echo.New()
@@ -98,9 +98,11 @@ func main() {
                 authGroup.DELETE("/topic", topic.DeleteTopic)
         }
 
-        PORT := os.Getenv("PORT")
-        if PORT == "" {
-                PORT = "8080"  
+        conf, err := utils.GetConfig()
+        if err != nil {
+                log.Println("Error retrieving config: ", err)
+                conf.Port = "8080"
         }
-        e.Logger.Fatal(e.Start(":"+ PORT))
+
+        e.Logger.Fatal(e.Start(":"+conf.Port))
 }

@@ -26,9 +26,14 @@ func GetHomePage(c echo.Context) error {
         page.CurrentPage = intPage
         intPage -= 1
 
-        MAX_TOPICS_DISPLAYED := 30
-        OFFSET := MAX_TOPICS_DISPLAYED * intPage
-        LIMIT := MAX_TOPICS_DISPLAYED
+        conf, err := utils.GetConfig()
+        if err != nil {
+                c.Logger().Info("Error retrieving config: ", err)
+                conf.MaxTopicPerPage = 30
+        }
+
+        OFFSET := conf.MaxTopicPerPage * intPage
+        LIMIT := conf.MaxTopicPerPage
 
         db := c.Get("db").(*sql.DB)
         user, ok := c.Get("user").(structs.User)
@@ -44,7 +49,7 @@ func GetHomePage(c echo.Context) error {
                 return c.Render(500, "home", response)
         }
 
-        page.TotalPage = (totalTopics + MAX_TOPICS_DISPLAYED - 1) / MAX_TOPICS_DISPLAYED
+        page.TotalPage = (totalTopics + conf.MaxTopicPerPage - 1) / conf.MaxTopicPerPage
 
         rows, err := db.Query(`
         SELECT 

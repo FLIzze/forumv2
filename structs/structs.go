@@ -71,3 +71,10 @@ type Status struct {
         Error string
         Success string
 }
+
+type Config struct {
+        Host string
+        Port string
+        MaxTopicPerPage int
+        MaxMessagePerPage int
+}
