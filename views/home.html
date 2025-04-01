@@ -41,7 +41,7 @@
                 {{ if gt .Page.CurrentPage 1 }}
                         <a href="/page/{{ sub .Page.CurrentPage 1 }}" class="button">Previous</a>
                 {{ end }}
-                
+
                 {{ if lt .Page.CurrentPage .Page.TotalPage }}
                         <a href="/page/{{ add .Page.CurrentPage 1 }}" class="button">Next</a>
                 {{ end }}

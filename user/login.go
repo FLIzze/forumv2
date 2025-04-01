@@ -59,8 +59,10 @@ func PostLogin(c echo.Context) error {
                 return c.Render(500, "login-form", response)
         }
 
+	var notification structs.Error
+	notification.Message = "Login succesfully."
         c.Response().Header().Set("HX-Redirect", "/page/1")
-	return c.NoContent(200)
+	return c.Render(200, "notification-center", notification)
 }
 
 func Login(db *sql.DB, uuid, sessionUUID string, c echo.Context) error {

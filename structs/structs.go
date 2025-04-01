@@ -87,11 +87,10 @@ type Error struct {
         Message string
 }
 
-func NewError(err error, status int, message string) Error {
+func NewError(status int, err error) Error {
         return Error {
-                Err: err,
                 Status: status,
-                Message: message,
+                Err: err,
         }
 }
 
@@ -103,15 +102,15 @@ func (e Error) HandleError(c echo.Context) error {
         switch e.Status {
         case 401:
                 e.Message = "You need to login to perform this action."
-                return c.Render(e.Status, "notification-center", nil)
+                return c.Render(e.Status, "notification-center", e)
         case 404:
                 return c.Render(e.Status, "404", nil)
         case 422:
                 e.Message = "Invalid Input."
-                return c.Render(e.Status, "notification-center", nil)
+                return c.Render(e.Status, "notification-center", e)
         case 500:
                 e.Message = "Something went wrong. Please wait and try again."
-                return c.Render(e.Status, "notification-center", nil)
+                return c.Render(e.Status, "notification-center", e)
         default:
                 return nil
         }

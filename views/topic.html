@@ -39,9 +39,13 @@
 
 {{ block "topic-toolbar" . }}
         <div class="toolbar">
-                <a href="/topic/{{ .Topic.UUID}}/{{ sub .Page.CurrentPage 1 }}" class="button">Previous</a>
-        
-                <a href="/topic/{{ .Topic.UUID}}/{{ add .Page.CurrentPage 1 }}" class="button">Next</a>
+                {{ if gt .Page.CurrentPage 1 }}
+                        <a href="/topic/{{ .Topic.UUID}}/{{ sub .Page.CurrentPage 1 }}" class="button">Previous</a>
+                {{ end }}
+
+                {{ if lt .Page.CurrentPage .Page.TotalPage }}
+                        <a href="/topic/{{ .Topic.UUID}}/{{ add .Page.CurrentPage 1 }}" class="button">Next</a>
+                {{ end }}
         </div>
 {{ end }}
 

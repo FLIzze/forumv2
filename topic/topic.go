@@ -14,8 +14,8 @@ import (
 func GetTopicPage(c echo.Context) error {
         var response structs.TopicResponse
 
-        topic, err := utils.GetTopic(c)
-        err.HandleError(c)
+        topic, error := utils.GetTopic(c)
+        error.HandleError(c)
 
         response.Topic = topic
         user, ok := c.Get("user").(structs.User)
@@ -23,16 +23,27 @@ func GetTopicPage(c echo.Context) error {
                 response.User = user
         }
 
-        messages, err := utils.GetMessages(c)
-        err.HandleError(c)
+        messages, error := utils.GetMessages(c)
+        error.HandleError(c)
         response.Messages = messages
+
+	conf, err := utils.GetConfig()
+	if err != nil {
+		c.Logger().Error("Error retrieving config", err)
+		conf.MessagesPerPage = 20
+	}
+
+	currentPage, error := utils.GetCurrentPage(c)
+        error.HandleError(c)
+	response.Page.CurrentPage = currentPage + 1
+	response.Page.TotalPage = (len(messages) / conf.MessagesPerPage) + 1
 
         return c.Render(200, "topic", response)
 }
 
 func PostMessage(c echo.Context) error {
-        response := structs.TopicResponse{}
-        message := structs.Message{}
+        var response structs.TopicResponse
+        var message structs.Message
 
         message.UUID = utils.Uuid()
         message.TopicUUID = c.FormValue("uuid")
@@ -63,17 +74,8 @@ func PostMessage(c echo.Context) error {
                 return c.Render(500, "topic-form", response)
         }
 
-        row := db.QueryRow(`
-        SELECT CreatedByUsername, CreatedByUUID, TopicUUID
-        FROM messageInfo
-        WHERE uuid = ?
-        `, message.UUID)
-        err = row.Scan(&message.CreatedByUsername, &message.CreatedByUUID, &response.Topic.UUID)
-        if err != nil {
-                c.Logger().Error("Error retrieving from messageInfo: ", err)
-                response.Status.Error = "Something went wrong. Please try again later."
-                return c.Render(500, "topic-form", response)
-        }
+        message, error := utils.GetMessage(c, message.UUID)
+        error.HandleError(c)
 
         response.Messages = append(response.Messages, message)
 
@@ -173,6 +175,10 @@ func PostTopic(c echo.Context) error {
         response := structs.HomeResponse{}
         topic := structs.Topic{}
 
+	currentPage, err := utils.GetCurrentPage(c)
+        err.HandleError(c)
+	response.Page.CurrentPage = currentPage + 1
+
         topic.UUID = utils.Uuid()
         topic.Name = c.FormValue("name")
         topic.Description = c.FormValue("message")
@@ -189,12 +195,12 @@ func PostTopic(c echo.Context) error {
 
         db := c.Get("db").(*sql.DB)
 
-        _, err := db.Exec(`
+	_, error := db.Exec(`
         INSERT INTO topic (UUID, Name, Description, CreatedBy, CreationTime) 
         VALUES (?, ?, ?, ?, ?)
         `, topic.UUID, topic.Name, topic.Description, user.UUID, time.Now())
-        if err != nil {
-                c.Logger().Error("Error inserting response Topic: ", err)
+        if error != nil {
+                c.Logger().Error("Error inserting response Topic: ", error)
                 response.Status.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "home-form", response)
         }
@@ -204,9 +210,9 @@ func PostTopic(c echo.Context) error {
         FROM topicInfo
         WHERE UUID = ?
         `, topic.UUID)
-        err = row.Scan(&topic.CreatedByUsername, &topic.CreatedByUUID, &topic.NmbMessages)
-        if err != nil {
-                c.Logger().Error("Error fetching new topic: ", err)
+        error = row.Scan(&topic.CreatedByUsername, &topic.CreatedByUUID, &topic.NmbMessages)
+        if error != nil {
+                c.Logger().Error("Error fetching new topic: ", error)
                 response.Status.Error = "Something went wrong. Please try again later."
                 return c.Render(500, "home-form", response)
         }

@@ -15,14 +15,12 @@ func GetTopics(c echo.Context) ([]structs.Topic, structs.Error) {
 
         conf, err := GetConfig()
         if err != nil {
-                c.Logger().Info("Error retrieving config: ", err)
-                conf.TopicsPerPage = 30
+                c.Logger().Error("Error retrieving config: ", err)
+		conf.TopicsPerPage = 30
         }
 
-        page, err := GetCurrentPage(c)
-        if err != nil {
-                c.Logger().Info("Error retrieving current page: ", err)
-        }
+        page, error := GetCurrentPage(c)
+        error.HandleError(c)
 
         db := c.Get("db").(*sql.DB)
 
@@ -37,7 +35,7 @@ func GetTopics(c echo.Context) ([]structs.Topic, structs.Error) {
         `, LIMIT, OFFSET)
         if err != nil {
                 c.Logger().Error("Error retrieving topic: ", err)
-                return nil, structs.NewError(err, 500, "Something went wrong. Please try again Later.")
+                return nil, structs.NewError(500, err)
         }
         defer rows.Close()
 
@@ -46,7 +44,7 @@ func GetTopics(c echo.Context) ([]structs.Topic, structs.Error) {
                         &topic.CreatedByUUID, &topic.NmbMessages, &topic.LastMessage, &topic.CreationTime)
                 if err != nil {
                         c.Logger().Error("Error scanning row", err)
-                        return nil, structs.NewError(err, 500, "Something went wrong. Please try again Later.")
+                        return nil, structs.NewError(500, err)
                 }
 
                 topic.FormattedCreationTime = FormatDate(topic.CreationTime)
@@ -55,7 +53,7 @@ func GetTopics(c echo.Context) ([]structs.Topic, structs.Error) {
                 topics = append(topics, topic)
         }
 
-        return topics, structs.NewError(nil, 200, "")
+        return topics, structs.NewError(200, nil)
 }
 
 func GetTopic(c echo.Context) (structs.Topic, structs.Error) {
@@ -75,7 +73,7 @@ func GetTopic(c echo.Context) (structs.Topic, structs.Error) {
                                                                         &topic.LastMessage, &topic.CreationTime)
         if err != nil {
                 c.Logger().Error("Error scanning row", err)
-                return topic, structs.NewError(err, 404, "")
+                return topic, structs.NewError(404, err)
         }
 
         htmlContent := string(blackfriday.Run([]byte(plainContent)))
@@ -83,7 +81,7 @@ func GetTopic(c echo.Context) (structs.Topic, structs.Error) {
         topic.FormattedCreationTime = FormatDate(topic.CreationTime)
         topic.FormattedLastMessage = FormatDate(topic.LastMessage)
 
-        return topic, structs.NewError(nil, 200, "")
+        return topic, structs.NewError(200, nil)
 }
 
 func GetMessages(c echo.Context) ([]structs.Message, structs.Error) {
@@ -93,16 +91,13 @@ func GetMessages(c echo.Context) ([]structs.Message, structs.Error) {
 
         uuid := c.Param("uuid")
 
-        page, err := GetCurrentPage(c)
-        if err != nil {
-                c.Logger().Info("Error retrieving current page: ", err)
-                page = 0
-        }
+        page, error := GetCurrentPage(c)
+        error.HandleError(c)
 
         conf, err := GetConfig()
         if err != nil {
-                c.Logger().Info("Error retrieving config: ", err)
-                conf.MessagesPerPage = 30
+                c.Logger().Error("Error retrieving config: ", err)
+		conf.MessagesPerPage = 20
         }
 
         OFFSET := conf.MessagesPerPage * page
@@ -119,7 +114,7 @@ func GetMessages(c echo.Context) ([]structs.Message, structs.Error) {
         `, uuid, LIMIT, OFFSET)
         if err != nil {
                 c.Logger().Error("Error retrieving topic message: ", err)
-                return messages, structs.NewError(err, 500, "Something went wrong. Please try again later.")
+                return messages, structs.NewError(500, err)
         }
         defer rows.Close()
 
@@ -128,7 +123,7 @@ func GetMessages(c echo.Context) ([]structs.Message, structs.Error) {
                 &message.CreationTime)
                 if err != nil {
                         c.Logger().Error("Error retrieving topic message from column: ", err)
-                        return messages, structs.NewError(err, 500, "Something went wrong. Please try again later.")
+                        return messages, structs.NewError(500, err)
                 }
 
                 htmlContent := string(blackfriday.Run([]byte(plainContent)))
@@ -138,5 +133,41 @@ func GetMessages(c echo.Context) ([]structs.Message, structs.Error) {
                 messages = append(messages, message)
         }
 
-        return messages, structs.NewError(nil, 200, "")
+        return messages, structs.NewError(200, nil)
+}
+
+func GetMessage(c echo.Context, uuid string) (structs.Message, structs.Error) {
+        var message structs.Message
+
+        db := c.Get("db").(*sql.DB)
+
+        row := db.QueryRow(`
+        SELECT CreatedByUsername, CreatedByUUID, TopicUUID
+        FROM messageInfo
+        WHERE uuid = ?
+        `, uuid)
+        err := row.Scan(&message.CreatedByUsername, &message.CreatedByUUID, &message.TopicUUID)
+        if err != nil {
+                c.Logger().Error("Error retrieving from messageInfo: ", err)
+                return message, structs.NewError(500, err)
+        }
+
+        return message, structs.NewError(200, nil)
+}
+
+func GetNmbTopics(c echo.Context) (int, structs.Error) {
+        db := c.Get("db").(*sql.DB)
+
+	var nmbTopics int
+
+	row := db.QueryRow(`
+	SELECT COUNT(*) FROM topic
+	`)
+	err := row.Scan(&nmbTopics)
+	if err != nil {
+		c.Logger().Error("Error scanning topic count")
+                return -1, structs.NewError(500, err)
+	}
+
+	return nmbTopics, structs.Error{}
 }
